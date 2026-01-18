@@ -7,11 +7,13 @@ public class PieceMoveCalculator {
     private final ChessBoard board;
     private final ChessPosition position;
     private final ChessPiece.PieceType pieceType;
+    private final ChessGame.TeamColor teamColor;
 
-    public PieceMoveCalculator(ChessBoard board, ChessPosition position, ChessPiece.PieceType pieceType){
+    public PieceMoveCalculator(ChessBoard board, ChessPosition position, ChessPiece.PieceType pieceType, ChessGame.TeamColor teamColor){
         this.board = board;
         this.position = position;
         this.pieceType = pieceType;
+        this.teamColor = teamColor;
     }
 
     public ArrayList<ChessMove> determineMoveCalculator(){
@@ -21,38 +23,84 @@ public class PieceMoveCalculator {
         throw new RuntimeException("Not implemented");
     }
 
+    public boolean spaceOccupiedMyPiece(ChessBoard board, ChessPosition position){
+        if (board.getPiece(position) == null){
+            return false;
+        }
+        return board.getPiece(position).getTeamColor() == teamColor;
+    }
+
+    public boolean spaceOccupiedOpponent(ChessBoard board, ChessPosition position){
+        if (board.getPiece(position) == null){
+            return false;
+        }
+        return board.getPiece(position).getTeamColor() != teamColor;
+    }
+
     public ArrayList<ChessMove> moveDiagonal(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
         //get valid moves to the right-up diagonal
         for (int i = 1; i < (9 - position.getRow()); i ++){
+            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() + i);
             if (position.getColumn() + i < 9){
-                ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() + i);
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                    if (spaceOccupiedOpponent(board, endPosition)) {
+                        break;
+                    }
+                }
+                else if (spaceOccupiedMyPiece(board, endPosition)){
+                    break;
+                }
             }
         }
         //get valid moves to the left-up diagonal
         for (int i = 1; i < position.getRow(); i++){
-            if (position.getColumn() + i < 9){
-                ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() + i);
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
+            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() + i);
+            if (position.getColumn() + i < 9) {
+                if (!spaceOccupiedMyPiece(board, endPosition)) {
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                    if (spaceOccupiedOpponent(board, endPosition)) {
+                        break;
+                    }
+                }
+                else if (spaceOccupiedMyPiece(board, endPosition)){
+                    break;
+                }
             }
         }
         //get valid moves to the right-down diagonal
         for (int i = 1; i < (9 - position.getRow()); i ++){
-            if (position.getColumn() - i > 0){
-                ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() - i);
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
+            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() - i);
+            if (position.getColumn() - i > 0) {
+                if (!spaceOccupiedMyPiece(board, endPosition)) {
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                    if (spaceOccupiedOpponent(board, endPosition)) {
+                        break;
+                    }
+                }
+                else if (spaceOccupiedMyPiece(board, endPosition)){
+                    break;
+                }
             }
         }
         //get valid moves to the left-down diagonal
         for (int i = 1; i < position.getRow(); i++){
-            if (position.getColumn() - i > 0){
-                ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() - i);
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
+            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() - i);
+            if (position.getColumn() - i > 0) {
+                if (!spaceOccupiedMyPiece(board, endPosition)) {
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                    if (spaceOccupiedOpponent(board, endPosition)) {
+                        break;
+                    }
+                }
+                else if (spaceOccupiedMyPiece(board, endPosition)){
+                    break;
+                }
             }
         }
         return moves;
