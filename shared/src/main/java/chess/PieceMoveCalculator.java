@@ -23,6 +23,9 @@ public class PieceMoveCalculator {
         else if (pieceType == ChessPiece.PieceType.ROOK){
             return rookMoveCalculator(board, position);
         }
+        else if (pieceType == ChessPiece.PieceType.QUEEN){
+            return queenMoveCalculator(board, position);
+        }
         throw new RuntimeException("Not implemented");
     }
 
@@ -180,6 +183,13 @@ public class PieceMoveCalculator {
     public ArrayList<ChessMove> rookMoveCalculator(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = moveHorizontal(board, position);
         moves.addAll(moveVertical(board, position));
+        return moves;
+    }
+
+    public ArrayList<ChessMove> queenMoveCalculator(ChessBoard board, ChessPosition position){
+        ArrayList<ChessMove> moves = moveHorizontal(board, position);
+        moves.addAll(moveVertical(board, position));
+        moves.addAll(moveDiagonal(board, position));
         return moves;
     }
 }
