@@ -20,6 +20,9 @@ public class PieceMoveCalculator {
         if (pieceType == ChessPiece.PieceType.BISHOP){
             return bishopMoveCalculator(board, position);
         }
+        else if (pieceType == ChessPiece.PieceType.ROOK){
+            return rookMoveCalculator(board, position);
+        }
         throw new RuntimeException("Not implemented");
     }
 
@@ -106,7 +109,77 @@ public class PieceMoveCalculator {
         return moves;
     }
 
+    public ArrayList<ChessMove> moveHorizontal(ChessBoard board, ChessPosition position){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        //get valid moves to the left
+        for (int i = 1; i < position.getColumn(); i ++){
+            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() - i);
+            if (!spaceOccupiedMyPiece(board, endPosition)){
+                ChessMove move = new ChessMove(position, endPosition, null);
+                moves.add(move);
+                if (spaceOccupiedOpponent(board, endPosition)) {
+                    break;
+                }
+            }
+            else if (spaceOccupiedMyPiece(board, endPosition)){
+                break;
+            }
+        }
+        //get valid moves to the right
+        for (int i = 1; i < (9 - position.getColumn()); i++){
+            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() + i);
+            if (!spaceOccupiedMyPiece(board, endPosition)) {
+                ChessMove move = new ChessMove(position, endPosition, null);
+                moves.add(move);
+                if (spaceOccupiedOpponent(board, endPosition)) {
+                    break;
+                }
+            } else if (spaceOccupiedMyPiece(board, endPosition)) {
+                break;
+            }
+        }
+        return moves;
+    }
+
+    public ArrayList<ChessMove> moveVertical(ChessBoard board, ChessPosition position){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        //get valid moves up
+        for (int i = 1; i < position.getRow(); i ++){
+            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn());
+            if (!spaceOccupiedMyPiece(board, endPosition)){
+                ChessMove move = new ChessMove(position, endPosition, null);
+                moves.add(move);
+                if (spaceOccupiedOpponent(board, endPosition)) {
+                    break;
+                }
+            }
+            else if (spaceOccupiedMyPiece(board, endPosition)){
+                break;
+            }
+        }
+        //get valid moves down
+        for (int i = 1; i < (9 - position.getRow()); i++){
+            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn());
+            if (!spaceOccupiedMyPiece(board, endPosition)) {
+                ChessMove move = new ChessMove(position, endPosition, null);
+                moves.add(move);
+                if (spaceOccupiedOpponent(board, endPosition)) {
+                    break;
+                }
+            } else if (spaceOccupiedMyPiece(board, endPosition)) {
+                break;
+            }
+        }
+        return moves;
+    }
+
     public ArrayList<ChessMove> bishopMoveCalculator(ChessBoard board, ChessPosition position){
         return moveDiagonal(board, position);
+    }
+
+    public ArrayList<ChessMove> rookMoveCalculator(ChessBoard board, ChessPosition position){
+        ArrayList<ChessMove> moves = moveHorizontal(board, position);
+        moves.addAll(moveVertical(board, position));
+        return moves;
     }
 }
