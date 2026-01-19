@@ -32,7 +32,9 @@ public class PieceMoveCalculator {
         else if (pieceType == ChessPiece.PieceType.KNIGHT){
             return knightMoveCalculator(board, position);
         }
-        throw new RuntimeException("Not implemented");
+        else{
+            return pawnMoveCalculator(board, position);
+        }
     }
 
     public boolean spaceOccupiedMyPiece(ChessBoard board, ChessPosition position){
@@ -152,7 +154,7 @@ public class PieceMoveCalculator {
 
     public ArrayList<ChessMove> moveVertical(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
-        //get valid moves up
+        //get valid moves down
         for (int i = 1; i < position.getRow(); i ++){
             ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn());
             if (!spaceOccupiedMyPiece(board, endPosition)){
@@ -166,7 +168,7 @@ public class PieceMoveCalculator {
                 break;
             }
         }
-        //get valid moves down
+        //get valid moves up
         for (int i = 1; i < (9 - position.getRow()); i++){
             ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn());
             if (!spaceOccupiedMyPiece(board, endPosition)) {
@@ -332,6 +334,105 @@ public class PieceMoveCalculator {
                 if (!spaceOccupiedMyPiece(board, endPosition)){
                     ChessMove move = new ChessMove(position, endPosition, null);
                     moves.add(move);
+                }
+            }
+        }
+        return moves;
+    }
+
+    public ArrayList<ChessMove> pawnMoveCalculator(ChessBoard board, ChessPosition position){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = position.getRow();
+        int col = position.getColumn();
+        ChessPiece.PieceType[] promotionPieceTypes = {ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK};
+        if (teamColor == ChessGame.TeamColor.WHITE){
+            for(int i: new int[]{-1,1}) {
+                ChessPosition endPosition = new ChessPosition(row + 1, col + i);
+                if (1 <= col + i && col + i <= 8 && 1 <= row + 1 && row + 1 <= 8) {
+                    if (spaceOccupiedOpponent(board, endPosition)) {
+                        if (row + 1 == 8) {
+                            for (ChessPiece.PieceType promotionPiece : promotionPieceTypes) {
+                                ChessMove move = new ChessMove(position, endPosition, promotionPiece);
+                                moves.add(move);
+                            }
+                        } else {
+                            ChessMove move = new ChessMove(position, endPosition, null);
+                            moves.add(move);
+                        }
+                    }
+                }
+            }
+            if (row == 2){
+                for (int i = 1; i < 3; i ++){
+                    ChessPosition endPosition = new ChessPosition(row + i, col);
+                    if (!spaceOccupiedMyPiece(board, endPosition) && !spaceOccupiedOpponent(board, endPosition)){
+                        ChessMove move = new ChessMove(position, endPosition, null);
+                        moves.add(move);
+                    }
+                    else if (spaceOccupiedMyPiece(board, endPosition) || spaceOccupiedOpponent(board, endPosition)){
+                        break;
+                    }
+                }
+            }
+            else{
+                ChessPosition endPosition = new ChessPosition(row + 1, col);
+                if (!spaceOccupiedMyPiece(board, endPosition) && !spaceOccupiedOpponent(board, endPosition)) {
+                    if (row + 1 == 8){
+                        for (ChessPiece.PieceType promotionPiece: promotionPieceTypes){
+                            ChessMove move = new ChessMove(position, endPosition, promotionPiece);
+                            moves.add(move);
+                        }
+                    }
+                    else {
+                        ChessMove move = new ChessMove(position, endPosition, null);
+                        moves.add(move);
+                    }
+                }
+            }
+
+        }
+        if (teamColor == ChessGame.TeamColor.BLACK){
+            for(int i: new int[]{-1,1}) {
+                ChessPosition endPosition = new ChessPosition(row - 1, col + i);
+                if (1 <= col + i && col + i <= 8 && 1 <= row - 1 && row - 1 <= 8) {
+                    if (spaceOccupiedOpponent(board, endPosition)) {
+                        if (row - 1 == 1) {
+                            for (ChessPiece.PieceType promotionPiece : promotionPieceTypes) {
+                                ChessMove move = new ChessMove(position, endPosition, promotionPiece);
+                                moves.add(move);
+                            }
+                        } else {
+                            ChessMove move = new ChessMove(position, endPosition, null);
+                            moves.add(move);
+                        }
+                    }
+                }
+            }
+            if (row == 7){
+                for (int i = 1; i < 3; i ++){
+                    ChessPosition endPosition = new ChessPosition(row - i, col);
+                    if (!spaceOccupiedMyPiece(board, endPosition) && !spaceOccupiedOpponent(board, endPosition)){
+                        ChessMove move = new ChessMove(position, endPosition, null);
+                        moves.add(move);
+                    }
+                    else if (spaceOccupiedMyPiece(board, endPosition) || spaceOccupiedOpponent(board, endPosition)){
+                        break;
+                    }
+                }
+            }
+            else {
+                ChessPosition endPosition = new ChessPosition(row - 1, col);
+                if (!spaceOccupiedMyPiece(board, endPosition) && !spaceOccupiedOpponent(board, endPosition)) {
+                    if (row - 1 == 1){
+                        for (ChessPiece.PieceType promotionPiece: promotionPieceTypes){
+                            ChessMove move = new ChessMove(position, endPosition, promotionPiece);
+                            moves.add(move);
+                        }
+                    }
+                    else {
+                        ChessMove move = new ChessMove(position, endPosition, null);
+                        moves.add(move);
+                    }
                 }
             }
         }
