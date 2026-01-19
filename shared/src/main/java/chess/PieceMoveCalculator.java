@@ -29,6 +29,9 @@ public class PieceMoveCalculator {
         else if (pieceType == ChessPiece.PieceType.KING){
             return kingMoveCalculator(board, position);
         }
+        else if (pieceType == ChessPiece.PieceType.KNIGHT){
+            return knightMoveCalculator(board, position);
+        }
         throw new RuntimeException("Not implemented");
     }
 
@@ -259,6 +262,77 @@ public class PieceMoveCalculator {
             if (!spaceOccupiedMyPiece(board, endPosition)){
                 ChessMove move = new ChessMove(position, endPosition, null);
                 moves.add(move);
+            }
+        }
+        return moves;
+    }
+
+    public ArrayList<ChessMove> knightMoveCalculator(ChessBoard board, ChessPosition position){
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = position.getRow();
+        int col = position.getColumn();
+        if (row + 2 < 9){
+            if (col + 1 < 9){
+                ChessPosition endPosition = new ChessPosition(row + 2, col + 1);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                }
+            }
+            if (col - 1 > 0){
+                ChessPosition endPosition = new ChessPosition(row + 2, col - 1);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                }
+            }
+        }
+        if (row - 2 > 0){
+            if (col + 1 < 9){
+                ChessPosition endPosition = new ChessPosition(row - 2, col + 1);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                }
+            }
+            if (col - 1 > 0){
+                ChessPosition endPosition = new ChessPosition(row - 2, col - 1);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                }
+            }
+        }
+        if (row + 1 < 9){
+            if (col + 2 < 9){
+                ChessPosition endPosition = new ChessPosition(row + 1, col + 2);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                }
+            }
+            if (col - 2 > 0){
+                ChessPosition endPosition = new ChessPosition(row + 1, col - 2);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                }
+            }
+        }
+        if (row - 1 > 0){
+            if (col + 2 < 9){
+                ChessPosition endPosition = new ChessPosition(row - 1, col + 2);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                }
+            }
+            if (col - 2 > 0){
+                ChessPosition endPosition = new ChessPosition(row - 1, col - 2);
+                if (!spaceOccupiedMyPiece(board, endPosition)){
+                    ChessMove move = new ChessMove(position, endPosition, null);
+                    moves.add(move);
+                }
             }
         }
         return moves;
