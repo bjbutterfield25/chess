@@ -3,116 +3,99 @@ package chess;
 import java.util.ArrayList;
 
 public class PieceMoveCalculator {
-
     private final ChessBoard board;
     private final ChessPosition position;
-    private final ChessPiece.PieceType pieceType;
-    private final ChessGame.TeamColor teamColor;
+    private final ChessPiece.PieceType type;
+    private final ChessGame.TeamColor color;
 
-    public PieceMoveCalculator(ChessBoard board, ChessPosition position, ChessPiece.PieceType pieceType, ChessGame.TeamColor teamColor){
+    public PieceMoveCalculator(ChessBoard board, ChessPosition position, ChessPiece.PieceType type, ChessGame.TeamColor color){
         this.board = board;
         this.position = position;
-        this.pieceType = pieceType;
-        this.teamColor = teamColor;
+        this.type = type;
+        this.color = color;
     }
 
     public ArrayList<ChessMove> determineMoveCalculator(){
-        if (pieceType == ChessPiece.PieceType.BISHOP){
+        if (type == ChessPiece.PieceType.BISHOP){
             return bishopMoveCalculator(board, position);
         }
-        else if (pieceType == ChessPiece.PieceType.ROOK){
+        else if (type == ChessPiece.PieceType.ROOK){
             return rookMoveCalculator(board, position);
         }
-        else if (pieceType == ChessPiece.PieceType.QUEEN){
+        else if (type == ChessPiece.PieceType.QUEEN){
             return queenMoveCalculator(board, position);
         }
-        else if (pieceType == ChessPiece.PieceType.KING){
-            return kingMoveCalculator(board, position);
-        }
-        else if (pieceType == ChessPiece.PieceType.KNIGHT){
+        else if (type == ChessPiece.PieceType.KNIGHT){
             return knightMoveCalculator(board, position);
         }
-        else{
-            return pawnMoveCalculator(board, position);
+        else if (type == ChessPiece.PieceType.KING){
+            return kingMoveCalculator(board, position);
         }
-    }
-
-    public boolean spaceOccupiedMyPiece(ChessBoard board, ChessPosition position){
-        if (board.getPiece(position) == null){
-            return false;
-        }
-        return board.getPiece(position).getTeamColor() == teamColor;
-    }
-
-    public boolean spaceOccupiedOpponent(ChessBoard board, ChessPosition position){
-        if (board.getPiece(position) == null){
-            return false;
-        }
-        return board.getPiece(position).getTeamColor() != teamColor;
+        return pawnMoveCalculator(board, position);
     }
 
     public ArrayList<ChessMove> moveDiagonal(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
-        //get valid moves to the right-up diagonal
-        for (int i = 1; i < (9 - position.getRow()); i ++){
-            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() + i);
+        //move up-right
+        for(int i = 1; position.getRow() + i < 9; i++){
             if (position.getColumn() + i < 9){
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                    if (spaceOccupiedOpponent(board, endPosition)) {
-                        break;
-                    }
+                ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() + i);
+                if(spaceOccupiedOpponent(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
+                    break;
                 }
-                else if (spaceOccupiedMyPiece(board, endPosition)){
+                if(!spaceOccupiedMyPiece(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                else{
                     break;
                 }
             }
         }
-        //get valid moves to the left-up diagonal
-        for (int i = 1; i < position.getRow(); i++){
-            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() + i);
-            if (position.getColumn() + i < 9) {
-                if (!spaceOccupiedMyPiece(board, endPosition)) {
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                    if (spaceOccupiedOpponent(board, endPosition)) {
-                        break;
-                    }
+        //move up-left
+        for(int i = 1; position.getRow() + i < 9; i++){
+            if (position.getColumn() - i > 0){
+                ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() - i);
+                if(spaceOccupiedOpponent(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
+                    break;
                 }
-                else if (spaceOccupiedMyPiece(board, endPosition)){
+                if(!spaceOccupiedMyPiece(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                else{
                     break;
                 }
             }
         }
-        //get valid moves to the right-down diagonal
-        for (int i = 1; i < (9 - position.getRow()); i ++){
-            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() - i);
-            if (position.getColumn() - i > 0) {
-                if (!spaceOccupiedMyPiece(board, endPosition)) {
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                    if (spaceOccupiedOpponent(board, endPosition)) {
-                        break;
-                    }
+        // move down-right
+        for(int i = 1; position.getRow() - i > 0; i++){
+            if (position.getColumn() + i < 9){
+                ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() + i);
+                if(spaceOccupiedOpponent(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
+                    break;
                 }
-                else if (spaceOccupiedMyPiece(board, endPosition)){
+                if(!spaceOccupiedMyPiece(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                else{
                     break;
                 }
             }
         }
-        //get valid moves to the left-down diagonal
-        for (int i = 1; i < position.getRow(); i++){
-            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() - i);
-            if (position.getColumn() - i > 0) {
-                if (!spaceOccupiedMyPiece(board, endPosition)) {
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                    if (spaceOccupiedOpponent(board, endPosition)) {
-                        break;
-                    }
+        //move down-left
+        for(int i = 1; position.getRow() - i > 0; i++){
+            if (position.getColumn() - i > 0){
+                ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn() - i);
+                if(spaceOccupiedOpponent(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
+                    break;
                 }
-                else if (spaceOccupiedMyPiece(board, endPosition)){
+                if(!spaceOccupiedMyPiece(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                else{
                     break;
                 }
             }
@@ -122,30 +105,31 @@ public class PieceMoveCalculator {
 
     public ArrayList<ChessMove> moveHorizontal(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
-        //get valid moves to the left
-        for (int i = 1; i < position.getColumn(); i ++){
-            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() - i);
-            if (!spaceOccupiedMyPiece(board, endPosition)){
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
-                if (spaceOccupiedOpponent(board, endPosition)) {
-                    break;
-                }
+        //move right
+        for (int i = 1; position.getColumn() + i < 9; i++){
+            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() + i);
+            if(spaceOccupiedOpponent(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
+                break;
             }
-            else if (spaceOccupiedMyPiece(board, endPosition)){
+            if(!spaceOccupiedMyPiece(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
+            }
+            else {
                 break;
             }
         }
-        //get valid moves to the right
-        for (int i = 1; i < (9 - position.getColumn()); i++){
-            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() + i);
-            if (!spaceOccupiedMyPiece(board, endPosition)) {
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
-                if (spaceOccupiedOpponent(board, endPosition)) {
-                    break;
-                }
-            } else if (spaceOccupiedMyPiece(board, endPosition)) {
+        //move left
+        for (int i = 1; position.getColumn() - i > 0; i++){
+            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() +- i);
+            if(spaceOccupiedOpponent(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
+                break;
+            }
+            if(!spaceOccupiedMyPiece(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
+            }
+            else {
                 break;
             }
         }
@@ -154,34 +138,49 @@ public class PieceMoveCalculator {
 
     public ArrayList<ChessMove> moveVertical(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
-        //get valid moves down
-        for (int i = 1; i < position.getRow(); i ++){
-            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn());
-            if (!spaceOccupiedMyPiece(board, endPosition)){
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
-                if (spaceOccupiedOpponent(board, endPosition)) {
-                    break;
-                }
+        //move up
+        for (int i = 1; position.getRow() + i < 9; i++){
+            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn());
+            if(spaceOccupiedOpponent(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
+                break;
             }
-            else if (spaceOccupiedMyPiece(board, endPosition)){
+            if(!spaceOccupiedMyPiece(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
+            }
+            else {
                 break;
             }
         }
-        //get valid moves up
-        for (int i = 1; i < (9 - position.getRow()); i++){
-            ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn());
-            if (!spaceOccupiedMyPiece(board, endPosition)) {
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
-                if (spaceOccupiedOpponent(board, endPosition)) {
-                    break;
-                }
-            } else if (spaceOccupiedMyPiece(board, endPosition)) {
+        //move down
+        for (int i = 1; position.getRow() - i > 0; i++){
+            ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn());
+            if(spaceOccupiedOpponent(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
+                break;
+            }
+            if(!spaceOccupiedMyPiece(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
+            }
+            else {
                 break;
             }
         }
         return moves;
+    }
+
+    public boolean spaceOccupiedMyPiece(ChessBoard board, ChessPosition position){
+        if (board.getPiece(position) == null){
+            return false;
+        }
+        return color == board.getPiece(position).getTeamColor();
+    }
+
+    public boolean spaceOccupiedOpponent(ChessBoard board, ChessPosition position){
+        if (board.getPiece(position) == null){
+            return false;
+        }
+        return color != board.getPiece(position).getTeamColor();
     }
 
     public ArrayList<ChessMove> bishopMoveCalculator(ChessBoard board, ChessPosition position){
@@ -201,140 +200,75 @@ public class PieceMoveCalculator {
         return moves;
     }
 
-    public ArrayList<ChessMove> kingMoveCalculator(ChessBoard board, ChessPosition position){
+    public ArrayList<ChessMove> knightMoveCalculator(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
-        int row = position.getRow();
-        int col = position.getColumn();
-        ChessPosition endPosition;
-        // move up
-        if (row + 1 < 9){
-            endPosition = new ChessPosition(row + 1, col);
-            if (!spaceOccupiedMyPiece(board, endPosition)){
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
-            }
-            if (col - 1 > 0){
-                endPosition = new ChessPosition(row + 1, col - 1);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
+        for(int i: new int[]{-1,1}){
+            if(position.getColumn() + i < 9 && position.getColumn() + i > 0){
+                if(position.getRow() + 2 < 9){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() + 2, position.getColumn() + i);
+                    if(!spaceOccupiedMyPiece(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
+                    }
                 }
-            }
-            if (col + 1 < 9){
-                endPosition = new ChessPosition(row + 1, col + 1);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
+                if(position.getRow() - 2 > 0){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() - 2, position.getColumn() + i);
+                    if(!spaceOccupiedMyPiece(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
+                    }
                 }
             }
         }
-        // move down
-        if (row - 1 > 0){
-            endPosition = new ChessPosition(row - 1, col);
-            if (!spaceOccupiedMyPiece(board, endPosition)){
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
-            }
-            if (col - 1 > 0){
-                endPosition = new ChessPosition(row - 1, col - 1);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
+        for(int i: new int[]{-1,1}){
+            if(position.getRow() + i < 9 && position.getRow() + i > 0){
+                if(position.getColumn() + 2 < 9){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() + 2);
+                    if(!spaceOccupiedMyPiece(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
+                    }
                 }
-            }
-            if (col + 1 < 9){
-                endPosition = new ChessPosition(row - 1, col + 1);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
+                if(position.getColumn() - 2 > 0){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn() - 2);
+                    if(!spaceOccupiedMyPiece(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
+                    }
                 }
-            }
-        }
-        //move right
-        if (col + 1 < 9){
-            endPosition = new ChessPosition(row, col + 1);
-            if (!spaceOccupiedMyPiece(board, endPosition)){
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
-            }
-        }
-        //move left
-        if (col - 1 > 0){
-            endPosition = new ChessPosition(row, col - 1);
-            if (!spaceOccupiedMyPiece(board, endPosition)){
-                ChessMove move = new ChessMove(position, endPosition, null);
-                moves.add(move);
             }
         }
         return moves;
     }
 
-    public ArrayList<ChessMove> knightMoveCalculator(ChessBoard board, ChessPosition position){
+    public ArrayList<ChessMove> kingMoveCalculator(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
-        int row = position.getRow();
-        int col = position.getColumn();
-        if (row + 2 < 9){
-            if (col + 1 < 9){
-                ChessPosition endPosition = new ChessPosition(row + 2, col + 1);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                }
-            }
-            if (col - 1 > 0){
-                ChessPosition endPosition = new ChessPosition(row + 2, col - 1);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
+        for (int i: new int[]{-1,0,1}){
+            if(position.getRow() + 1 < 9){
+                if(position.getColumn() + i < 9 && position.getColumn() + i > 0){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() + 1, position.getColumn() + i);
+                    if(!spaceOccupiedMyPiece(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
+                    }
                 }
             }
         }
-        if (row - 2 > 0){
-            if (col + 1 < 9){
-                ChessPosition endPosition = new ChessPosition(row - 2, col + 1);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                }
-            }
-            if (col - 1 > 0){
-                ChessPosition endPosition = new ChessPosition(row - 2, col - 1);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
+        for (int i: new int[]{-1,0,1}){
+            if(position.getRow() - 1 > 0){
+                if(position.getColumn() + i < 9 && position.getColumn() + i > 0){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() - 1, position.getColumn() + i);
+                    if(!spaceOccupiedMyPiece(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
+                    }
                 }
             }
         }
-        if (row + 1 < 9){
-            if (col + 2 < 9){
-                ChessPosition endPosition = new ChessPosition(row + 1, col + 2);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                }
-            }
-            if (col - 2 > 0){
-                ChessPosition endPosition = new ChessPosition(row + 1, col - 2);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                }
+        if(position.getColumn() + 1 < 9){
+            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() + 1);
+            if(!spaceOccupiedMyPiece(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
             }
         }
-        if (row - 1 > 0){
-            if (col + 2 < 9){
-                ChessPosition endPosition = new ChessPosition(row - 1, col + 2);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                }
-            }
-            if (col - 2 > 0){
-                ChessPosition endPosition = new ChessPosition(row - 1, col - 2);
-                if (!spaceOccupiedMyPiece(board, endPosition)){
-                    ChessMove move = new ChessMove(position, endPosition, null);
-                    moves.add(move);
-                }
+        if(position.getColumn() - 1 > 0){
+            ChessPosition endPosition = new ChessPosition(position.getRow(), position.getColumn() - 1);
+            if(!spaceOccupiedMyPiece(board, endPosition)){
+                moves.add(new ChessMove(position, endPosition, null));
             }
         }
         return moves;
@@ -342,97 +276,88 @@ public class PieceMoveCalculator {
 
     public ArrayList<ChessMove> pawnMoveCalculator(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
-        int row = position.getRow();
-        int col = position.getColumn();
-        ChessPiece.PieceType[] promotionPieceTypes = {ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK};
-        if (teamColor == ChessGame.TeamColor.WHITE){
-            for(int i: new int[]{-1,1}) {
-                ChessPosition endPosition = new ChessPosition(row + 1, col + i);
-                if (1 <= col + i && col + i <= 8 && 1 <= row + 1 && row + 1 <= 8) {
-                    if (spaceOccupiedOpponent(board, endPosition)) {
-                        if (row + 1 == 8) {
-                            for (ChessPiece.PieceType promotionPiece : promotionPieceTypes) {
-                                ChessMove move = new ChessMove(position, endPosition, promotionPiece);
-                                moves.add(move);
+        ChessPiece.PieceType[] promotionPieceType = {ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP};
+        if (color == ChessGame.TeamColor.WHITE){
+            for(int i: new int[]{-1,1}){
+                if(position.getColumn() + i < 9 && position.getColumn() + i > 0){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() + 1, position.getColumn() + i);
+                    if(position.getRow() + 1 == 8){
+                        for(ChessPiece.PieceType promotionPiece: promotionPieceType){
+                            if(spaceOccupiedOpponent(board, endPosition)){
+                                moves.add(new ChessMove(position, endPosition, promotionPiece));
                             }
-                        } else {
-                            ChessMove move = new ChessMove(position, endPosition, null);
-                            moves.add(move);
                         }
+                    }
+                    else if(spaceOccupiedOpponent(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
                     }
                 }
             }
-            if (row == 2){
-                for (int i = 1; i < 3; i ++){
-                    ChessPosition endPosition = new ChessPosition(row + i, col);
-                    if (!spaceOccupiedMyPiece(board, endPosition) && !spaceOccupiedOpponent(board, endPosition)){
-                        ChessMove move = new ChessMove(position, endPosition, null);
-                        moves.add(move);
+            if(position.getRow() == 2){
+                for(int i = 1; i < 3; i++){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() + i, position.getColumn());
+                    if(!spaceOccupiedOpponent(board, endPosition) && !spaceOccupiedMyPiece(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
                     }
-                    else if (spaceOccupiedMyPiece(board, endPosition) || spaceOccupiedOpponent(board, endPosition)){
+                    else{
                         break;
+                    }
+                }
+            }
+            else if (position.getRow() + 1 == 8){
+                ChessPosition endPosition = new ChessPosition(position.getRow() + 1, position.getColumn());
+                if(!spaceOccupiedOpponent(board, endPosition) && !spaceOccupiedMyPiece(board, endPosition)){
+                    for(ChessPiece.PieceType promotionPiece: promotionPieceType){
+                        moves.add(new ChessMove(position, endPosition, promotionPiece));
                     }
                 }
             }
             else{
-                ChessPosition endPosition = new ChessPosition(row + 1, col);
-                if (!spaceOccupiedMyPiece(board, endPosition) && !spaceOccupiedOpponent(board, endPosition)) {
-                    if (row + 1 == 8){
-                        for (ChessPiece.PieceType promotionPiece: promotionPieceTypes){
-                            ChessMove move = new ChessMove(position, endPosition, promotionPiece);
-                            moves.add(move);
-                        }
-                    }
-                    else {
-                        ChessMove move = new ChessMove(position, endPosition, null);
-                        moves.add(move);
-                    }
+                ChessPosition endPosition = new ChessPosition(position.getRow() + 1, position.getColumn());
+                if(!spaceOccupiedOpponent(board, endPosition) && !spaceOccupiedMyPiece(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
                 }
             }
-
         }
-        if (teamColor == ChessGame.TeamColor.BLACK){
-            for(int i: new int[]{-1,1}) {
-                ChessPosition endPosition = new ChessPosition(row - 1, col + i);
-                if (1 <= col + i && col + i <= 8 && 1 <= row - 1 && row - 1 <= 8) {
-                    if (spaceOccupiedOpponent(board, endPosition)) {
-                        if (row - 1 == 1) {
-                            for (ChessPiece.PieceType promotionPiece : promotionPieceTypes) {
-                                ChessMove move = new ChessMove(position, endPosition, promotionPiece);
-                                moves.add(move);
+        if (color == ChessGame.TeamColor.BLACK){
+            for(int i: new int[]{-1,1}){
+                if(position.getColumn() + i < 9 && position.getColumn() + i > 0){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() - 1, position.getColumn() + i);
+                    if(position.getRow() - 1 == 1){
+                        for(ChessPiece.PieceType promotionPiece: promotionPieceType){
+                            if(spaceOccupiedOpponent(board, endPosition)){
+                                moves.add(new ChessMove(position, endPosition, promotionPiece));
                             }
-                        } else {
-                            ChessMove move = new ChessMove(position, endPosition, null);
-                            moves.add(move);
                         }
+                    }
+                    else if(spaceOccupiedOpponent(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
                     }
                 }
             }
-            if (row == 7){
-                for (int i = 1; i < 3; i ++){
-                    ChessPosition endPosition = new ChessPosition(row - i, col);
-                    if (!spaceOccupiedMyPiece(board, endPosition) && !spaceOccupiedOpponent(board, endPosition)){
-                        ChessMove move = new ChessMove(position, endPosition, null);
-                        moves.add(move);
+            if(position.getRow() == 7){
+                for(int i = 1; i < 3; i++){
+                    ChessPosition endPosition = new ChessPosition(position.getRow() - i, position.getColumn());
+                    if(!spaceOccupiedOpponent(board, endPosition) && !spaceOccupiedMyPiece(board, endPosition)){
+                        moves.add(new ChessMove(position, endPosition, null));
                     }
-                    else if (spaceOccupiedMyPiece(board, endPosition) || spaceOccupiedOpponent(board, endPosition)){
+                    else{
                         break;
                     }
                 }
             }
-            else {
-                ChessPosition endPosition = new ChessPosition(row - 1, col);
-                if (!spaceOccupiedMyPiece(board, endPosition) && !spaceOccupiedOpponent(board, endPosition)) {
-                    if (row - 1 == 1){
-                        for (ChessPiece.PieceType promotionPiece: promotionPieceTypes){
-                            ChessMove move = new ChessMove(position, endPosition, promotionPiece);
-                            moves.add(move);
-                        }
+            else if (position.getRow() - 1 == 1){
+                ChessPosition endPosition = new ChessPosition(position.getRow() - 1, position.getColumn());
+                if(!spaceOccupiedOpponent(board, endPosition) && !spaceOccupiedMyPiece(board, endPosition)){
+                    for(ChessPiece.PieceType promotionPiece: promotionPieceType){
+                        moves.add(new ChessMove(position, endPosition, promotionPiece));
                     }
-                    else {
-                        ChessMove move = new ChessMove(position, endPosition, null);
-                        moves.add(move);
-                    }
+                }
+            }
+            else{
+                ChessPosition endPosition = new ChessPosition(position.getRow() - 1, position.getColumn());
+                if(!spaceOccupiedOpponent(board, endPosition) && !spaceOccupiedMyPiece(board, endPosition)){
+                    moves.add(new ChessMove(position, endPosition, null));
                 }
             }
         }
