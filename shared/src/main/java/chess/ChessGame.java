@@ -11,10 +11,12 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessGame {
-    private TeamColor teamTurn = TeamColor.WHITE;
-    private ChessBoard currentBoard = new ChessBoard();
+    private TeamColor teamTurn;
+    private ChessBoard currentBoard;
     public ChessGame() {
+        this.currentBoard = new ChessBoard();
         currentBoard.resetBoard();
+        this.teamTurn = TeamColor.WHITE;
     }
 
     /**
@@ -49,7 +51,37 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        if (currentBoard.getPiece(startPosition) == null){
+            return null;
+        }
+        ChessPiece piece = currentBoard.getPiece(startPosition);
+        ChessGame.TeamColor color = piece.getTeamColor();
+        ArrayList<ChessMove> allMoves = (ArrayList<ChessMove>) currentBoard.getPiece(startPosition).pieceMoves(currentBoard, startPosition);
+        ArrayList<ChessMove> validMoves = new ArrayList<>();
+        ChessGame tempGame = new ChessGame();
+        for (ChessMove move: allMoves){
+            tempGame.setBoard(currentBoard);
+            ChessPosition endPosition = move.getEndPosition();
+            // Checks to see if there is already if a piece at endPosition to store it
+            ChessPiece originalPiece = null;
+            if (tempGame.getBoard().getPiece(endPosition) != null){
+                originalPiece = tempGame.getBoard().getPiece(endPosition);
+            }
+            // "Moves" piece to new location
+            tempGame.getBoard().addPiece(endPosition, piece);
+            // Sets original location to null
+            tempGame.getBoard().addPiece(startPosition, null);
+            //check to see if in check
+            boolean invalidMove = tempGame.isInCheck(color);
+            // if the move doesn't put you in check then it is valid
+            if (!invalidMove){
+                validMoves.add(move);
+            }
+            //reset board to the original since this is a shallow copy
+            tempGame.getBoard().addPiece(startPosition, piece);
+            tempGame.getBoard().addPiece(endPosition, originalPiece);
+        }
+        return validMoves;
     }
 
     /**
@@ -101,6 +133,7 @@ public class ChessGame {
         }
         return false;
     }
+
 
     /**
      * Determines if the given team is in checkmate
