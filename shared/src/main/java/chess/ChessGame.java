@@ -127,21 +127,15 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        // get king location
+        // get king location and location of all attacking pieces
         ChessPosition kingLocation = null;
+        ArrayList<ChessPosition> pieceLocations = new ArrayList<>();
         for (int i = 1; i < 9; i++){
             for (int j = 1; j < 9; j++){
                 ChessPosition position = new ChessPosition(i, j);
                 if (Objects.equals(currentBoard.getPiece(position), new ChessPiece(teamColor, ChessPiece.PieceType.KING))){
                     kingLocation = position;
                 }
-            }
-        }
-        // get all attacking piece locations
-        ArrayList<ChessPosition> pieceLocations = new ArrayList<>();
-        for (int i = 1; i < 9; i++){
-            for (int j = 1; j < 9; j++){
-                ChessPosition position = new ChessPosition(i, j);
                 if (currentBoard.getPiece(position) != null && currentBoard.getPiece(position).getTeamColor() != teamColor){
                     pieceLocations.add(position);
                 }
@@ -199,7 +193,27 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)){
+            // get all the color's pieces
+            ArrayList<ChessPosition> pieceLocations = new ArrayList<>();
+            for (int i = 1; i < 9; i++){
+                for (int j = 1; j < 9; j++){
+                    ChessPosition position = new ChessPosition(i, j);
+                    if (currentBoard.getPiece(position) != null && currentBoard.getPiece(position).getTeamColor() == teamColor){
+                        pieceLocations.add(position);
+                    }
+                }
+            }
+            ArrayList<ChessMove> allValidMoves = new ArrayList<>();
+            for (ChessPosition position: pieceLocations){
+                ArrayList<ChessMove> pieceValidMoves = (ArrayList<ChessMove>) validMoves(position);
+                if (pieceValidMoves != null){
+                    allValidMoves.addAll(pieceValidMoves);
+                }
+            }
+            return allValidMoves.isEmpty();
+        }
+        return false;
     }
 
     /**
