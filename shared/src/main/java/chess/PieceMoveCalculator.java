@@ -276,7 +276,12 @@ public class PieceMoveCalculator {
 
     public ArrayList<ChessMove> pawnMoveCalculator(ChessBoard board, ChessPosition position){
         ArrayList<ChessMove> moves = new ArrayList<>();
-        ChessPiece.PieceType[] promotionPieceType = {ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP};
+        ChessPiece.PieceType[] promotionPieceType = {
+                ChessPiece.PieceType.QUEEN,
+                ChessPiece.PieceType.ROOK,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.BISHOP
+        };
         if (color == ChessGame.TeamColor.WHITE){
             for(int i: new int[]{-1,1}){
                 if(position.getColumn() + i < 9 && position.getColumn() + i > 0){
