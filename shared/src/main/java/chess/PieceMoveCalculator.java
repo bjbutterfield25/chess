@@ -286,7 +286,9 @@ public class PieceMoveCalculator {
         int startRow  = (color == ChessGame.TeamColor.WHITE) ? 2 : 7;
         int promoRow  = (color == ChessGame.TeamColor.WHITE) ? 8 : 1;
         for(int i: new int[]{-1,1}){
-            if(position.getColumn() + i > 8 || position.getColumn() + i < 1) continue;
+            if(position.getColumn() + i > 8 || position.getColumn() + i < 1) {
+                continue;
+            }
             ChessPosition endPosition = new ChessPosition(position.getRow() + direction, position.getColumn() + i);
             if(position.getRow() + direction == promoRow){
                 for(ChessPiece.PieceType promotionPiece: promotionPieceType){
