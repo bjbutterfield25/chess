@@ -271,6 +271,33 @@ public class PieceMoveCalculator {
                 moves.add(new ChessMove(position, endPosition, null));
             }
         }
+
+        //castling
+        if (!board.getPiece(position).isMoved() && position.getColumn() == 5){
+            ChessPiece myPiece = board.getPiece(position);
+            ChessGame.TeamColor myColor = myPiece.getTeamColor();
+            //left side
+            ChessPiece leftCorner = board.getPiece(new ChessPosition(position.getRow(), 1));
+            if(leftCorner != null && leftCorner.getPieceType() == ChessPiece.PieceType.ROOK &&
+                    !leftCorner.isMoved() && myColor == leftCorner.getTeamColor() &&
+                    board.getPiece(new ChessPosition(position.getRow(), 2)) == null &&
+                    board.getPiece(new ChessPosition(position.getRow(), 3)) == null &&
+                    board.getPiece(new ChessPosition(position.getRow(), 4)) == null
+            ){
+                ChessMove leftCastle = new ChessMove(position, new ChessPosition(position.getRow(), 3), null);
+                moves.add(leftCastle);
+            }
+            //right side
+            ChessPiece rightCorner = board.getPiece(new ChessPosition(position.getRow(), 8));
+            if(rightCorner != null && rightCorner.getPieceType() == ChessPiece.PieceType.ROOK &&
+                    !rightCorner.isMoved() && myColor == rightCorner.getTeamColor() &&
+                    board.getPiece(new ChessPosition(position.getRow(), 6)) == null &&
+                    board.getPiece(new ChessPosition(position.getRow(), 7)) == null
+            ){
+                ChessMove rightCastle = new ChessMove(position, new ChessPosition(position.getRow(), 7), null);
+                moves.add(rightCastle);
+            }
+        }
         return moves;
     }
 

@@ -61,18 +61,66 @@ public class ChessGame {
         for (ChessMove move: allMoves){
             ChessBoard tempGame = currentBoard.clone();
             ChessPosition endPosition = move.getEndPosition();
-            // "Moves" piece to new location
-            tempGame.addPiece(endPosition, piece);
-            // Sets original location to null
-            tempGame.addPiece(startPosition, null);
-            //check to see if in check
-            ChessBoard realBoard = currentBoard;
-            currentBoard = tempGame;
-            boolean invalidMove = isInCheck(color);
-            currentBoard = realBoard;
-            // if the move doesn't put you in check then it is valid
-            if (!invalidMove){
-                validMoves.add(move);
+            boolean invalidMove = true;
+            if ((piece.getPieceType() == ChessPiece.PieceType.KING) && (Math.abs(move.getStartPosition().getColumn() - move.getEndPosition().getColumn()) > 1)){
+                // castling left
+                if (move.getStartPosition().getColumn() > move.getEndPosition().getColumn()){
+                    for (int i = 0; i < 3; i++){
+                        tempGame = currentBoard.clone();
+                        ChessPosition tempPosition = new ChessPosition(startPosition.getRow(), startPosition.getColumn() - i);
+                        tempGame.addPiece(tempPosition, piece);
+                        if (!tempPosition.equals(startPosition)){
+                            tempGame.addPiece(startPosition, null);
+                        }
+                        ChessBoard realBoard = currentBoard;
+                        currentBoard = tempGame;
+                        invalidMove = isInCheck(color);
+                        currentBoard = realBoard;
+                        if (invalidMove){
+                            break;
+                        }
+                    }
+                    if (!invalidMove){
+                        validMoves.add(move);
+                    }
+                }
+                // castling right
+                else {
+                    for (int i = 0; i < 3; i++){
+                        tempGame = currentBoard.clone();
+                        ChessPosition tempPosition = new ChessPosition(startPosition.getRow(), startPosition.getColumn() + i);
+                        // "Moves" piece to new location
+                        tempGame.addPiece(tempPosition, piece);
+                        if (!tempPosition.equals(startPosition)){
+                            tempGame.addPiece(startPosition, null);
+                        }
+                        ChessBoard realBoard = currentBoard;
+                        currentBoard = tempGame;
+                        invalidMove = isInCheck(color);
+                        currentBoard = realBoard;
+                        if (invalidMove){
+                            break;
+                        }
+                    }
+                    if (!invalidMove){
+                        validMoves.add(move);
+                    }
+                }
+            }
+            else {
+                // "Moves" piece to new location
+                tempGame.addPiece(endPosition, piece);
+                // Sets original location to null
+                tempGame.addPiece(startPosition, null);
+                //check to see if in check
+                ChessBoard realBoard = currentBoard;
+                currentBoard = tempGame;
+                invalidMove = isInCheck(color);
+                currentBoard = realBoard;
+                // if the move doesn't put you in check then it is valid
+                if (!invalidMove){
+                    validMoves.add(move);
+                }
             }
         }
         return validMoves;
@@ -94,6 +142,28 @@ public class ChessGame {
                     currentBoard.addPiece(move.getEndPosition(), promotionPiece);
                     currentBoard.addPiece(move.getStartPosition(), null);
                 }
+                else if ((piece.getPieceType() == ChessPiece.PieceType.KING) && (Math.abs(move.getStartPosition().getColumn() - move.getEndPosition().getColumn()) > 1)){
+                    // castling left
+                    if (move.getStartPosition().getColumn() > move.getEndPosition().getColumn()){
+                        currentBoard.addPiece(move.getEndPosition(), piece);
+                        currentBoard.addPiece(move.getStartPosition(), null);
+                        ChessPosition rookStart = new ChessPosition(move.getEndPosition().getRow(), 1);
+                        ChessPosition rookEnd = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn() + 1);
+                        ChessPiece rook = currentBoard.getPiece(rookStart);
+                        currentBoard.addPiece(rookEnd, rook);
+                        currentBoard.addPiece(rookStart, null);
+                    }
+                    // castling right
+                    else {
+                        currentBoard.addPiece(move.getEndPosition(), piece);
+                        currentBoard.addPiece(move.getStartPosition(), null);
+                        ChessPosition rookStart = new ChessPosition(move.getEndPosition().getRow(), 8);
+                        ChessPosition rookEnd = new ChessPosition(move.getEndPosition().getRow(), move.getEndPosition().getColumn() - 1);
+                        ChessPiece rook = currentBoard.getPiece(rookStart);
+                        currentBoard.addPiece(rookEnd, rook);
+                        currentBoard.addPiece(rookStart, null);
+                    }
+                }
                 else {
                     currentBoard.addPiece(move.getEndPosition(), piece);
                     currentBoard.addPiece(move.getStartPosition(), null);
@@ -102,6 +172,7 @@ public class ChessGame {
             else {
                 throw new InvalidMoveException("It is not your turn");
             }
+            piece.setMoved(true);
         }
         else {
             throw new InvalidMoveException("Move is invalid");
