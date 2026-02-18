@@ -13,4 +13,8 @@ public class ServerHandler {
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
         return userService.register(registerRequest);
     }
+
+    public void clear(){
+        userService.clear();
+    }
 }

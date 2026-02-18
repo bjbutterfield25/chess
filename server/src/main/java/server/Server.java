@@ -16,7 +16,8 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
-        createHandlers(javalin);
+        registerEndpoint(javalin);
+        clearEndpoint(javalin);
     }
 
     public int run(int desiredPort) {
@@ -28,7 +29,7 @@ public class Server {
         javalin.stop();
     }
 
-    public void createHandlers(Javalin server){
+    public void registerEndpoint(Javalin server){
         server.post("/user", ctx -> {
             var serializer = new Gson();
             try{
@@ -47,6 +48,13 @@ public class Server {
             }
         }
         );
+    }
+
+    public void clearEndpoint(Javalin server){
+        server.delete("/db", ctx -> {
+            handler.clear();
+            ctx.status(200);
+        });
     }
 
 }
