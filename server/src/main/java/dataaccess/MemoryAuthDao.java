@@ -20,6 +20,11 @@ public class MemoryAuthDao implements AuthDAO{
         return null;
     }
 
+    public void deleteAuth(String authToken) {
+        AuthData auth = getAuth(authToken);
+        auths.remove(auth);
+    }
+
     public void clear() {
         auths = new ArrayList<>();
     }

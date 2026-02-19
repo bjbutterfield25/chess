@@ -24,4 +24,8 @@ public class ServerHandler {
         return userService.login(loginRequest);
     }
 
+    public void logout(String authToken) throws DataAccessException {
+        userService.logout(authToken);
+    }
+
 }

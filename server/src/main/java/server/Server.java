@@ -19,6 +19,7 @@ public class Server {
         registerEndpoint(javalin);
         clearEndpoint(javalin);
         loginEndpoint(javalin);
+        logoutEndpoint(javalin);
     }
 
     public int run(int desiredPort) {
@@ -79,5 +80,23 @@ public class Server {
         );
     }
 
+    public void logoutEndpoint(Javalin server){
+        server.delete("/session", ctx -> {
+            var serializer = new Gson();
+            try{
+                String authToken = ctx.header("Authorization");
+                handler.logout(authToken);
+                ctx.status(200);
+            } catch (DataAccessException e) {
+                String message = e.getMessage();
+                if (message.equals("Error: unauthorized")) {
+                    ctx.status(401).result(serializer.toJson(Map.of("message", message)));
+                } else {
+                    ctx.status(500).result(serializer.toJson(Map.of("message", message)));
+                }
+            }
+        }
+        );
+    }
 
 }
