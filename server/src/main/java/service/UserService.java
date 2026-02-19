@@ -2,6 +2,7 @@ package service;
 
 import model.*;
 import dataaccess.*;
+import org.eclipse.jetty.util.log.Log;
 
 import java.util.UUID;
 
@@ -33,5 +34,17 @@ public class UserService {
         authDAO.clear();
     }
 
+    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+        if(loginRequest.username() == null || loginRequest.password() == null ||
+                loginRequest.username().isBlank() || loginRequest.password().isBlank()){
+            throw new DataAccessException("Error: bad request");
+        }
+        if(userDAO.getUser(loginRequest.username()) == null || !userDAO.getUser(loginRequest.username()).password().equals(loginRequest.password())){
+            throw new DataAccessException("Error: unauthorized");
+        }
+        AuthData auth = new AuthData(UUID.randomUUID().toString(), loginRequest.username());
+        authDAO.createAuth(auth);
+        return new LoginResult(auth.username(), auth.authToken());
+    }
 
 }

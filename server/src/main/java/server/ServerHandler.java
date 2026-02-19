@@ -1,6 +1,8 @@
 package server;
 
 import dataaccess.DataAccessException;
+import model.LoginRequest;
+import model.LoginResult;
 import model.RegisterRequest;
 import model.RegisterResult;
 import service.UserService;
@@ -17,4 +19,9 @@ public class ServerHandler {
     public void clear(){
         userService.clear();
     }
+
+    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+        return userService.login(loginRequest);
+    }
+
 }
