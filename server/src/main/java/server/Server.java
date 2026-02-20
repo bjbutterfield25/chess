@@ -20,6 +20,7 @@ public class Server {
         clearEndpoint(javalin);
         loginEndpoint(javalin);
         logoutEndpoint(javalin);
+        createGameEndpoint(javalin);
     }
 
     public int run(int desiredPort) {
@@ -96,6 +97,28 @@ public class Server {
                 }
             }
         }
+        );
+    }
+
+    public void createGameEndpoint(Javalin server){
+        server.post("/game", ctx -> {
+                    var serializer = new Gson();
+                    try{
+                        String authToken = ctx.header("Authorization");
+                        CreateGameRequest createGameRequest = serializer.fromJson(ctx.body(), CreateGameRequest.class);
+                        CreateGameResult response = handler.createGame(authToken, createGameRequest);
+                        ctx.status(200).result(serializer.toJson(response));
+                    } catch (DataAccessException e) {
+                        String message = e.getMessage();
+                        if (message.equals("Error: unauthorized")) {
+                            ctx.status(401).result(serializer.toJson(Map.of("message", message)));
+                        } else if (message.equals("Error: bad request")) {
+                            ctx.status(400).result(serializer.toJson(Map.of("message", message)));
+                        } else {
+                            ctx.status(500).result(serializer.toJson(Map.of("message", message)));
+                        }
+                    }
+                }
         );
     }
 

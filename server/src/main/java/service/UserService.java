@@ -47,13 +47,14 @@ public class UserService {
     }
 
     public void logout(String authToken) throws DataAccessException {
-        if (!isAuthenticated(authToken)) {
-            throw new DataAccessException("Error: unauthorized");
-        }
+        isAuthenticated(authToken);
         authDAO.deleteAuth(authToken);
     }
 
-    public boolean isAuthenticated(String authToken){
+    public boolean isAuthenticated(String authToken) throws DataAccessException {
+        if (authDAO.getAuth(authToken) == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
         return authDAO.getAuth(authToken) != null;
     }
 
