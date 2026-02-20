@@ -2,7 +2,6 @@ package service;
 
 import model.*;
 import dataaccess.*;
-import org.eclipse.jetty.util.log.Log;
 
 import java.util.UUID;
 
@@ -48,11 +47,15 @@ public class UserService {
     }
 
     public void logout(String authToken) throws DataAccessException {
-        AuthData auth = authDAO.getAuth(authToken);
-        if (auth == null ) {
+        if (!isAuthenticated(authToken)) {
             throw new DataAccessException("Error: unauthorized");
         }
         authDAO.deleteAuth(authToken);
     }
+
+    public boolean isAuthenticated(String authToken){
+        return authDAO.getAuth(authToken) != null;
+    }
+
 
 }
