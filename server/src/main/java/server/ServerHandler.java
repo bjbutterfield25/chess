@@ -34,5 +34,10 @@ public class ServerHandler {
         return gameService.createGame(gameName);
     }
 
+    public void joinGame(String authToken, JoinGameRequest joinGameRequest) throws DataAccessException {
+        userService.isAuthenticated(authToken);
+        AuthData authData = userService.getAuthData(authToken);
+        gameService.joinGame(joinGameRequest, authData);
+    }
 
 }

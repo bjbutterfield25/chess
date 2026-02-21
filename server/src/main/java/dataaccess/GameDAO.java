@@ -6,7 +6,8 @@ import java.util.ArrayList;
 
 public interface GameDAO {
     void createGame(GameData gameData);
-    GameData updateGame(GameData newGameData);
+    GameData getGame(int gameID);
+    void deleteGame(int gameID);
     ArrayList<GameData> listGames();
     void clear();
 }

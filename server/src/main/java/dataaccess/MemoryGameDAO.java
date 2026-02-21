@@ -10,11 +10,20 @@ public class MemoryGameDAO implements GameDAO{
         games.add(gameData);
     }
 
-    public GameData updateGame(GameData newGameData) {
-        return null;
+    public void deleteGame(int gameID) {
+        games.remove(getGame(gameID));
     }
 
     public ArrayList<GameData> listGames() {
+        return null;
+    }
+
+    public GameData getGame(int gameID) {
+        for (GameData game: games){
+            if (game.gameID() == gameID){
+                return game;
+            }
+        }
         return null;
     }
 
