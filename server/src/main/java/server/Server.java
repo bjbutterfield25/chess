@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import io.javalin.*;
+import io.javalin.http.Context;
 import model.*;
 
 import java.util.Map;
@@ -42,14 +43,7 @@ public class Server {
                 RegisterResult response = handler.register(request);
                 ctx.status(200).result(serializer.toJson(response));
             } catch (DataAccessException e) {
-                String message = e.getMessage();
-                if (message.equals("Error: already taken")) {
-                    ctx.status(403).result(serializer.toJson(Map.of("message", message)));
-                } else if (message.equals("Error: bad request")) {
-                    ctx.status(400).result(serializer.toJson(Map.of("message", message)));
-                } else {
-                    ctx.status(500).result(serializer.toJson(Map.of("message", message)));
-                }
+                errorToStatus(ctx, e, serializer);
             }
         }
         );
@@ -70,14 +64,7 @@ public class Server {
                 LoginResult response = handler.login(request);
                 ctx.status(200).result(serializer.toJson(response));
             } catch (DataAccessException e) {
-                String message = e.getMessage();
-                if (message.equals("Error: unauthorized")) {
-                    ctx.status(401).result(serializer.toJson(Map.of("message", message)));
-                } else if (message.equals("Error: bad request")) {
-                    ctx.status(400).result(serializer.toJson(Map.of("message", message)));
-                } else {
-                    ctx.status(500).result(serializer.toJson(Map.of("message", message)));
-                }
+                errorToStatus(ctx, e, serializer);
             }
         }
         );
@@ -91,12 +78,7 @@ public class Server {
                 handler.logout(authToken);
                 ctx.status(200);
             } catch (DataAccessException e) {
-                String message = e.getMessage();
-                if (message.equals("Error: unauthorized")) {
-                    ctx.status(401).result(serializer.toJson(Map.of("message", message)));
-                } else {
-                    ctx.status(500).result(serializer.toJson(Map.of("message", message)));
-                }
+                errorToStatus(ctx, e, serializer);
             }
         }
         );
@@ -104,23 +86,16 @@ public class Server {
 
     public void createGameEndpoint(Javalin server){
         server.post("/game", ctx -> {
-                    var serializer = new Gson();
-                    try{
-                        String authToken = ctx.header("Authorization");
-                        CreateGameRequest createGameRequest = serializer.fromJson(ctx.body(), CreateGameRequest.class);
-                        CreateGameResult response = handler.createGame(authToken, createGameRequest);
-                        ctx.status(200).result(serializer.toJson(response));
-                    } catch (DataAccessException e) {
-                        String message = e.getMessage();
-                        if (message.equals("Error: unauthorized")) {
-                            ctx.status(401).result(serializer.toJson(Map.of("message", message)));
-                        } else if (message.equals("Error: bad request")) {
-                            ctx.status(400).result(serializer.toJson(Map.of("message", message)));
-                        } else {
-                            ctx.status(500).result(serializer.toJson(Map.of("message", message)));
-                        }
-                    }
-                }
+            var serializer = new Gson();
+            try{
+                String authToken = ctx.header("Authorization");
+                CreateGameRequest createGameRequest = serializer.fromJson(ctx.body(), CreateGameRequest.class);
+                CreateGameResult response = handler.createGame(authToken, createGameRequest);
+                ctx.status(200).result(serializer.toJson(response));
+            } catch (DataAccessException e) {
+                errorToStatus(ctx, e, serializer);
+            }
+        }
         );
     }
 
@@ -133,16 +108,7 @@ public class Server {
                 handler.joinGame(authToken, joinGameRequest);
                 ctx.status(200);
             } catch (DataAccessException e) {
-                String message = e.getMessage();
-                if (message.equals("Error: unauthorized")) {
-                    ctx.status(401).result(serializer.toJson(Map.of("message", message)));
-                } else if (message.equals("Error: bad request")) {
-                    ctx.status(400).result(serializer.toJson(Map.of("message", message)));
-                } else if (message.equals("Error: already taken")){
-                    ctx.status(403).result(serializer.toJson(Map.of("message", message)));
-                } else {
-                    ctx.status(500).result(serializer.toJson(Map.of("message", message)));
-                }
+                errorToStatus(ctx, e, serializer);
             }
         });
     }
@@ -156,13 +122,20 @@ public class Server {
                 ctx.status(200).result(serializer.toJson(response));
             }
             catch (DataAccessException e) {
-                String message = e.getMessage();
-                if (message.equals("Error: unauthorized")) {
-                    ctx.status(401).result(serializer.toJson(Map.of("message", message)));
-                } else {
-                    ctx.status(500).result(serializer.toJson(Map.of("message", message)));
-                }
+                errorToStatus(ctx, e, serializer);
             }
         });
     }
+
+
+    public void errorToStatus(Context ctx, DataAccessException e, Gson serializer) {
+        String message = e.getMessage();
+        switch (message) {
+            case "Error: unauthorized" -> ctx.status(401).result(serializer.toJson(Map.of("message", message)));
+            case "Error: bad request" -> ctx.status(400).result(serializer.toJson(Map.of("message", message)));
+            case "Error: already taken" -> ctx.status(403).result(serializer.toJson(Map.of("message", message)));
+            default -> ctx.status(500).result(serializer.toJson(Map.of("message", message)));
+        }
+    }
 }
+
