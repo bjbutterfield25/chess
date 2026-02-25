@@ -11,7 +11,7 @@ import java.util.Map;
 public class Server {
 
     private final Javalin javalin;
-    private ServerHandler handler = new ServerHandler();
+    private final ServerHandler handler = new ServerHandler();
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -126,7 +126,6 @@ public class Server {
             }
         });
     }
-
 
     public void errorToStatus(Context ctx, DataAccessException e, Gson serializer) {
         String message = e.getMessage();

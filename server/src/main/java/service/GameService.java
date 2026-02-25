@@ -58,7 +58,8 @@ public class GameService {
                 throw new DataAccessException("Error: already taken");
             }
         }
-        GameData updatedGame = new GameData(joinGameRequest.gameID(), whiteUsername, blackUsername, currentGameData.gameName(), currentGameData.game());
+        GameData updatedGame = new GameData(joinGameRequest.gameID(), whiteUsername,
+                blackUsername, currentGameData.gameName(), currentGameData.game());
         gameData.deleteGame(currentGameData.gameID());
         gameData.createGame(updatedGame);
     }
