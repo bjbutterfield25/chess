@@ -62,4 +62,8 @@ public class GameService {
         gameData.deleteGame(currentGameData.gameID());
         gameData.createGame(updatedGame);
     }
+
+    public ListGamesResult listGames(){
+        return new ListGamesResult(gameData.listGames());
+    }
 }

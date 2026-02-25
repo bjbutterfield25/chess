@@ -40,4 +40,9 @@ public class ServerHandler {
         gameService.joinGame(joinGameRequest, authData);
     }
 
+    public ListGamesResult listGames(String authToken) throws DataAccessException {
+        userService.isAuthenticated(authToken);
+        return gameService.listGames();
+    }
+
 }

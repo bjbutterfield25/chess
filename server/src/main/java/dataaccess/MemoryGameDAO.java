@@ -15,7 +15,7 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     public ArrayList<GameData> listGames() {
-        return null;
+        return games;
     }
 
     public GameData getGame(int gameID) {

@@ -22,6 +22,7 @@ public class Server {
         logoutEndpoint(javalin);
         createGameEndpoint(javalin);
         joinGameEndpoint(javalin);
+        listGamesEndpoint(javalin);
     }
 
     public int run(int desiredPort) {
@@ -139,6 +140,25 @@ public class Server {
                     ctx.status(400).result(serializer.toJson(Map.of("message", message)));
                 } else if (message.equals("Error: already taken")){
                     ctx.status(403).result(serializer.toJson(Map.of("message", message)));
+                } else {
+                    ctx.status(500).result(serializer.toJson(Map.of("message", message)));
+                }
+            }
+        });
+    }
+
+    public void listGamesEndpoint(Javalin server){
+        server.get("/game", ctx -> {
+            var serializer = new Gson();
+            try {
+                String authToken = ctx.header("Authorization");
+                ListGamesResult response =  handler.listGames(authToken);
+                ctx.status(200).result(serializer.toJson(response));
+            }
+            catch (DataAccessException e) {
+                String message = e.getMessage();
+                if (message.equals("Error: unauthorized")) {
+                    ctx.status(401).result(serializer.toJson(Map.of("message", message)));
                 } else {
                     ctx.status(500).result(serializer.toJson(Map.of("message", message)));
                 }
