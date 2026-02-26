@@ -11,8 +11,9 @@ import org.junit.jupiter.api.Test;
 
 public class UserServiceTests {
     private static UserService service;
+
     @BeforeAll
-    public static void setup(){
+    public static void setup() {
         service = new UserService();
     }
 
@@ -47,4 +48,15 @@ public class UserServiceTests {
         Assertions.assertThrows(DataAccessException.class, () -> service.login(request));
     }
 
+    @Test
+    public void logoutSuccess() throws DataAccessException {
+        RegisterResult registerResult = service.register(new RegisterRequest("user", "pass", "test@mail.com"));
+        Assertions.assertDoesNotThrow(() -> service.logout(registerResult.authToken()));
+    }
+
+    @Test
+    public void logoutFailure() throws DataAccessException {
+        service.register(new RegisterRequest("user", "pass", "test@mail.com"));
+        Assertions.assertThrows(DataAccessException.class, () -> service.logout("bad-auth"));
+    }
 }
