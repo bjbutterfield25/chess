@@ -1,10 +1,7 @@
 package service;
 
 import dataaccess.DataAccessException;
-import model.LoginRequest;
-import model.LoginResult;
-import model.RegisterRequest;
-import model.RegisterResult;
+import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,6 +67,22 @@ public class UserServiceTests {
     public void isAuthenticatedFailure() throws DataAccessException {
         service.register(new RegisterRequest("user", "pass", "test@mail.com"));
         Assertions.assertThrows(DataAccessException.class, () -> service.isAuthenticated("bad-auth"));
+    }
+
+    @Test
+    public void getAuthDataSuccess() throws DataAccessException {
+        RegisterResult result = service.register(new RegisterRequest("user", "pass", "test@mail.com"));
+        String token = result.authToken();
+        AuthData auth = service.getAuthData(result.authToken());
+        Assertions.assertNotNull(auth);
+        Assertions.assertEquals("user", auth.username());
+        Assertions.assertEquals(token, auth.authToken());
+    }
+
+    @Test
+    public void getAuthDataFailure() {
+        String badToken = "bad-auth";
+        Assertions.assertNull(service.getAuthData(badToken));
     }
 
     @Test
