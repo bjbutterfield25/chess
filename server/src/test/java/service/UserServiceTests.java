@@ -71,4 +71,14 @@ public class UserServiceTests {
         service.register(new RegisterRequest("user", "pass", "test@mail.com"));
         Assertions.assertThrows(DataAccessException.class, () -> service.isAuthenticated("bad-auth"));
     }
+
+    @Test
+    public void clearSuccess() throws DataAccessException {
+        RegisterResult result = service.register(new RegisterRequest("user", "pass", "test@mail.com"));
+        String token = result.authToken();
+        Assertions.assertNotNull(token);
+        service.clear();
+        Assertions.assertNull(service.getAuthData(token));
+    }
+
 }
