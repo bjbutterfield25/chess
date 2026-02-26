@@ -6,14 +6,14 @@ import model.LoginResult;
 import model.RegisterRequest;
 import model.RegisterResult;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class UserServiceTests {
     private static UserService service;
 
-    @BeforeAll
-    public static void setup() {
+    @BeforeEach
+    public void setup() {
         service = new UserService();
     }
 
