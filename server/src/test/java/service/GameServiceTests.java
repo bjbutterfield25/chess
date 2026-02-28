@@ -27,6 +27,20 @@ public class GameServiceTests {
     }
 
     @Test
+    public void listGamesSuccess() throws DataAccessException {
+        service.createGame(new CreateGameRequest("test1"));
+        service.createGame(new CreateGameRequest("test2"));
+        service.createGame(new CreateGameRequest("test3"));
+        Assertions.assertEquals(3, service.listGames().games().size());
+    }
+
+    @Test
+    public void listGamesFailure() {
+        Assertions.assertNotNull(service.listGames());
+        Assertions.assertTrue(service.listGames().games().isEmpty());
+    }
+
+    @Test
     public void clearSuccess() throws DataAccessException {
         CreateGameResult result = service.createGame(new CreateGameRequest("test"));
         Assertions.assertNotNull(result);
