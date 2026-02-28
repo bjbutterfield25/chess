@@ -25,4 +25,12 @@ public class GameServiceTests {
     public void createGameFailure() {
         Assertions.assertThrows(DataAccessException.class, () -> service.createGame(new CreateGameRequest("")));
     }
+
+    @Test
+    public void clearSuccess() throws DataAccessException {
+        CreateGameResult result = service.createGame(new CreateGameRequest("test"));
+        Assertions.assertNotNull(result);
+        service.clear();
+        Assertions.assertTrue(service.listGames().games().isEmpty());
+    }
 }
