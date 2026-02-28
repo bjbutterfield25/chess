@@ -1,8 +1,7 @@
 package service;
 
 import dataaccess.DataAccessException;
-import model.CreateGameRequest;
-import model.CreateGameResult;
+import model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +23,25 @@ public class GameServiceTests {
     @Test
     public void createGameFailure() {
         Assertions.assertThrows(DataAccessException.class, () -> service.createGame(new CreateGameRequest("")));
+    }
+
+    @Test
+    public void joinGameSuccess() throws DataAccessException {
+        CreateGameResult result = service.createGame(new CreateGameRequest("test"));
+        AuthData auth = new AuthData("token", "player");
+        JoinGameRequest request = new JoinGameRequest("White", result.gameID());
+        service.joinGame(request, auth);
+        GameData game = service.gameData.getGame(result.gameID());
+        Assertions.assertEquals("player", game.whiteUsername());
+        Assertions.assertEquals("test", game.gameName());
+    }
+
+    @Test
+    public void joinGameFailure() throws DataAccessException {
+        CreateGameResult result = service.createGame(new CreateGameRequest("test"));
+        AuthData auth = new AuthData("token", "player");
+        JoinGameRequest request = new JoinGameRequest("purple", result.gameID());
+        Assertions.assertThrows(DataAccessException.class, () -> service.joinGame(request, auth));
     }
 
     @Test
