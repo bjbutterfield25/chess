@@ -29,6 +29,46 @@ public class DatabaseManager {
         }
     }
 
+    private static final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS users (
+            username VARCHAR(255) PRIMARY KEY,
+            password VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS auths (
+            authToken VARCHAR(255) PRIMARY KEY,
+            username VARCHAR(255) NOT NULL,
+            FOREIGN KEY (username) REFERENCES users(username)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS games (
+            gameID INT AUTO_INCREMENT PRIMARY KEY,
+            whiteUsername VARCHAR(255),
+            blackUsername VARCHAR(255),
+            gameName VARCHAR(255) NOT NULL,
+            game TEXT,
+            FOREIGN KEY (whiteUsername) REFERENCES users(username),
+            FOREIGN KEY (blackUsername) REFERENCES users(username)
+            )
+            """
+    };
+
+    public static void createTables() throws DataAccessException {
+        createDatabase();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            for (String statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
+    }
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
