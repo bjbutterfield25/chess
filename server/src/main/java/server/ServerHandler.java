@@ -8,7 +8,7 @@ import service.UserService;
 public class ServerHandler {
     UserService userService;
     GameService gameService;
-    public ServerHandler(){
+    public ServerHandler() throws DataAccessException {
         userService = new UserService();
         gameService = new GameService();
     }
@@ -16,7 +16,7 @@ public class ServerHandler {
         return userService.register(registerRequest);
     }
 
-    public void clear(){
+    public void clear() throws DataAccessException {
         userService.clear();
         gameService.clear();
     }

@@ -11,9 +11,14 @@ import java.util.Map;
 public class Server {
 
     private final Javalin javalin;
-    private final ServerHandler handler = new ServerHandler();
+    private final ServerHandler handler;
 
     public Server() {
+        try {
+            handler = new ServerHandler();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.

@@ -43,8 +43,7 @@ public class DatabaseManager {
             """
             CREATE TABLE IF NOT EXISTS auths (
             authToken VARCHAR(255) PRIMARY KEY,
-            username VARCHAR(255) NOT NULL,
-            FOREIGN KEY (username) REFERENCES users(username)
+            username VARCHAR(255) NOT NULL
             )
             """,
             """
@@ -53,9 +52,7 @@ public class DatabaseManager {
             whiteUsername VARCHAR(255),
             blackUsername VARCHAR(255),
             gameName VARCHAR(255) NOT NULL,
-            game TEXT,
-            FOREIGN KEY (whiteUsername) REFERENCES users(username),
-            FOREIGN KEY (blackUsername) REFERENCES users(username)
+            game TEXT
             )
             """
     };

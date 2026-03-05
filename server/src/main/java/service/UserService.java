@@ -8,9 +8,9 @@ import java.util.UUID;
 public class UserService {
     UserDAO userDAO;
     AuthDAO authDAO;
-    public UserService(){
-        userDAO = new MemoryUserDAO();
-        authDAO = new MemoryAuthDao();
+    public UserService() throws DataAccessException {
+        userDAO = new SQLUserDao();
+        authDAO = new SQLAuthDao();
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
@@ -28,7 +28,7 @@ public class UserService {
         return new RegisterResult(auth.username(), auth.authToken());
     }
 
-    public void clear(){
+    public void clear() throws DataAccessException {
         userDAO.clear();
         authDAO.clear();
     }

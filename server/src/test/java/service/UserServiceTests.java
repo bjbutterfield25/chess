@@ -10,7 +10,7 @@ public class UserServiceTests {
     private static UserService service;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws DataAccessException {
         service = new UserService();
     }
 
