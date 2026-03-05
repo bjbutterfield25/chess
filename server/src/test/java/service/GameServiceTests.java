@@ -53,7 +53,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void listGamesFailure() {
+    public void listGamesFailure() throws DataAccessException {
         Assertions.assertNotNull(service.listGames());
         Assertions.assertTrue(service.listGames().games().isEmpty());
     }

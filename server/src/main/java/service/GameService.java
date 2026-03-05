@@ -61,7 +61,7 @@ public class GameService {
         gameData.createGame(updatedGame);
     }
 
-    public ListGamesResult listGames(){
+    public ListGamesResult listGames() throws DataAccessException {
         return new ListGamesResult(gameData.listGames());
     }
 }
