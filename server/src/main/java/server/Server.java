@@ -56,8 +56,13 @@ public class Server {
 
     public void clearEndpoint(Javalin server){
         server.delete("/db", ctx -> {
-            handler.clear();
-            ctx.status(200);
+            var serializer = new Gson();
+            try{
+                handler.clear();
+                ctx.status(200);
+            } catch (DataAccessException e){
+                errorToStatus(ctx, e, serializer);
+            }
         });
     }
 
@@ -138,7 +143,7 @@ public class Server {
             case "Error: unauthorized" -> ctx.status(401).result(serializer.toJson(Map.of("message", message)));
             case "Error: bad request" -> ctx.status(400).result(serializer.toJson(Map.of("message", message)));
             case "Error: already taken" -> ctx.status(403).result(serializer.toJson(Map.of("message", message)));
-            default -> ctx.status(500).result(serializer.toJson(Map.of("message", message)));
+            default -> ctx.status(500).result(serializer.toJson(Map.of("message", "Error: Internal Server Error")));
         }
     }
 }
