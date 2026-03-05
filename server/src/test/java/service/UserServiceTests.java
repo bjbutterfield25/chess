@@ -80,7 +80,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void getAuthDataFailure() {
+    public void getAuthDataFailure() throws DataAccessException {
         String badToken = "bad-auth";
         Assertions.assertNull(service.getAuthData(badToken));
     }

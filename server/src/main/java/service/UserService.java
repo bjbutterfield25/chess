@@ -58,7 +58,7 @@ public class UserService {
         return authDAO.getAuth(authToken) != null;
     }
 
-    public AuthData getAuthData(String authToken) {
+    public AuthData getAuthData(String authToken) throws DataAccessException {
         return authDAO.getAuth(authToken);
     }
 
