@@ -3,15 +3,13 @@ package service;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
-import dataaccess.MemoryGameDAO;
+import dataaccess.SQLGameDAO;
 import model.*;
-
-import java.util.Random;
 
 public class GameService {
     GameDAO gameData;
-    public GameService(){
-        gameData = new MemoryGameDAO();
+    public GameService() throws DataAccessException{
+        gameData = new SQLGameDAO();
     }
 
     public void clear() throws DataAccessException{

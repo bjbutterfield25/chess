@@ -21,8 +21,9 @@ public class SQLGameDAO implements GameDAO {
         return null;
     }
 
-    public void deleteGame(int gameID) {
-
+    public void deleteGame(int gameID) throws DataAccessException {
+        var statement = "DELETE FROM auths WHERE gameID = ?";
+        DatabaseManager.executeUpdate(statement, gameID);
     }
 
     public ArrayList<GameData> listGames() {

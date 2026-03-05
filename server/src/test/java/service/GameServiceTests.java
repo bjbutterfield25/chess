@@ -10,7 +10,7 @@ public class GameServiceTests {
     private static GameService service;
 
     @BeforeEach
-    public void setup(){
+    public void setup() throws DataAccessException{
         service = new GameService();
     }
 
