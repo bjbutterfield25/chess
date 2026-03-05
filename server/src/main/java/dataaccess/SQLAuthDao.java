@@ -2,6 +2,10 @@ package dataaccess;
 
 import model.AuthData;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 public class SQLAuthDao implements AuthDAO{
     public SQLAuthDao() throws DataAccessException {
         DatabaseManager.createTables();
@@ -12,7 +16,20 @@ public class SQLAuthDao implements AuthDAO{
         DatabaseManager.executeUpdate(statement, authData.username(), authData.authToken());
     }
 
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT authToken, username FROM auths WHERE authToken=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setNString(1, authToken);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return new AuthData(rs.getString("authToken"), rs.getString("username"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
         return null;
     }
 
