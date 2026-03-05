@@ -10,10 +10,11 @@ public class SQLGameDAO implements GameDAO {
         DatabaseManager.createTables();
     }
 
-    public void createGame(GameData gameData) throws DataAccessException {
+    public GameData createGame(GameData gameData) throws DataAccessException {
         var statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
         var game = new Gson().toJson(gameData.game());
-        DatabaseManager.executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+        int gameID = DatabaseManager.executeUpdate(statement, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+        return new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.game());
     }
 
     public GameData getGame(int gameID) {

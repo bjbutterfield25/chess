@@ -22,11 +22,10 @@ public class GameService {
         if (gameName.gameName() == null || gameName.gameName().isBlank()){
             throw new DataAccessException("Error: bad request");
         }
-        int gameID = Math.abs(new Random().nextInt());
         ChessGame game = new ChessGame();
-        GameData newGameData = new GameData(gameID, null, null, gameName.gameName(), game);
-        gameData.createGame(newGameData);
-        return new CreateGameResult(gameID);
+        GameData currentGameData = new GameData(0, null, null, gameName.gameName(), game);
+        GameData finalGameData = gameData.createGame(currentGameData);
+        return new CreateGameResult(finalGameData.gameID());
     }
 
     public void joinGame(JoinGameRequest joinGameRequest, AuthData authData) throws DataAccessException {

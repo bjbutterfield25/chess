@@ -6,8 +6,9 @@ import java.util.ArrayList;
 
 public class MemoryGameDAO implements GameDAO{
     ArrayList<GameData> games = new ArrayList<>();
-    public void createGame(GameData gameData) {
+    public GameData createGame(GameData gameData) {
         games.add(gameData);
+        return gameData;
     }
 
     public void deleteGame(int gameID) {
