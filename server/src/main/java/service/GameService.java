@@ -14,7 +14,7 @@ public class GameService {
         gameData = new MemoryGameDAO();
     }
 
-    public void clear(){
+    public void clear() throws DataAccessException{
         gameData.clear();
     }
 

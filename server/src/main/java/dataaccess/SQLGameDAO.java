@@ -28,7 +28,8 @@ public class SQLGameDAO implements GameDAO {
         return null;
     }
 
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        var statement = "TRUNCATE games";
+        DatabaseManager.executeUpdate(statement);
     }
 }
