@@ -15,7 +15,8 @@ public class SQLUserDao implements UserDAO {
         return null;
     }
 
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        var statement = "TRUNCATE users";
+        DatabaseManager.executeUpdate(statement);
     }
 }
