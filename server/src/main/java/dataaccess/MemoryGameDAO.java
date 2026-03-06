@@ -31,4 +31,8 @@ public class MemoryGameDAO implements GameDAO{
     public void clear() {
         games = new ArrayList<>();
     }
+
+    public void joinGame(int i, String whiteUsername, String blackUsername) throws DataAccessException {
+        //doesn't do anything because it had to be added when the method was added for SQLGameDAO
+    }
 }

@@ -42,14 +42,19 @@ public class SQLGameDAO implements GameDAO {
     }
 
     public void deleteGame(int gameID) throws DataAccessException {
-        var statement = "DELETE FROM auths WHERE gameID = ?";
+        var statement = "DELETE FROM games WHERE gameID = ?";
         DatabaseManager.executeUpdate(statement, gameID);
+    }
+
+    public void joinGame(int gameID, String whiteUsername, String blackUsername) throws DataAccessException {
+        var statement = "UPDATE games SET whiteUsername = ?, blackUsername = ? WHERE gameID = ?";
+        DatabaseManager.executeUpdate(statement, whiteUsername, blackUsername, gameID);
     }
 
     public ArrayList<GameData> listGames() throws DataAccessException {
         ArrayList<GameData> allGames = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID=?";
+            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
