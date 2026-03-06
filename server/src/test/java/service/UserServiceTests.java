@@ -12,6 +12,7 @@ public class UserServiceTests {
     @BeforeEach
     public void setup() throws DataAccessException {
         service = new UserService();
+        service.clear();
     }
 
     @Test

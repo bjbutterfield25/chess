@@ -12,6 +12,7 @@ public class GameServiceTests {
     @BeforeEach
     public void setup() throws DataAccessException{
         service = new GameService();
+        service.clear();
     }
 
     @Test
