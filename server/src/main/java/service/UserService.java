@@ -40,7 +40,7 @@ public class UserService {
             throw new DataAccessException("Error: bad request");
         }
         UserData user = userDAO.getUser(loginRequest.username());
-        if(user.username() == null || !BCrypt.checkpw(loginRequest.password(), user.password())){
+        if(user == null || user.username() == null || !BCrypt.checkpw(loginRequest.password(), user.password())){
             throw new DataAccessException("Error: unauthorized");
         }
         AuthData auth = new AuthData(UUID.randomUUID().toString(), loginRequest.username());
