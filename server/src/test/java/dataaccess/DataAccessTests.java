@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 public class DataAccessTests {
     private static SQLGameDAO gameDAO;
     private static SQLUserDao userDAO;
@@ -166,5 +168,21 @@ public class DataAccessTests {
     @Test
     public void joinGameNegative() {
         Assertions.assertDoesNotThrow(() -> gameDAO.joinGame(0, "white", "black"));
+    }
+
+    @Test
+    public void listGamesPositive() throws DataAccessException {
+        GameData game1 = new GameData(0, null, null, "TestGame1", new ChessGame());
+        GameData game2 = new GameData(0, null, null, "TestGame2", new ChessGame());
+        gameDAO.createGame(game1);
+        gameDAO.createGame(game2);
+        ArrayList<GameData> games = gameDAO.listGames();
+        Assertions.assertEquals(2, games.size());
+    }
+
+    @Test
+    public void listGamesNegative() throws DataAccessException {
+        ArrayList<GameData> games = gameDAO.listGames();
+        Assertions.assertTrue(games.isEmpty());
     }
 }
