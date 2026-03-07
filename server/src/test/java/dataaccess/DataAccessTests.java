@@ -89,6 +89,21 @@ public class DataAccessTests {
         Assertions.assertThrows(Exception.class, () -> userDAO.createUser(null));
     }
 
+    @Test
+    public void getUserPositive() throws DataAccessException {
+        UserData user = new UserData("test", "pass", "test@test.com");
+        userDAO.createUser(user);
+        UserData result = userDAO.getUser("test");
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("test", result.username());
+    }
+
+    @Test
+    public void getUserNegative() throws DataAccessException {
+        UserData result = userDAO.getUser("test");
+        Assertions.assertNull(result);
+    }
+
     //Game Tests
     @Test
     public void clearGamePositive() {
