@@ -1,5 +1,6 @@
 package dataaccess;
 
+import model.AuthData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,21 @@ public class DataAccessTests {
     public void clearAuthPositive() {
         Assertions.assertDoesNotThrow(()->authDAO.clear());
     }
+
+    @Test
+    public void createAuthPositive() throws DataAccessException {
+        AuthData auth = new AuthData("token123","user");
+        authDAO.createAuth(auth);
+        AuthData result = authDAO.getAuth("token123");
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("user", result.username());
+    }
+
+    @Test
+    public void createAuthNegative() {
+        Assertions.assertThrows(Exception.class, () -> authDAO.createAuth(null));
+    }
+
     //User Tests
     @Test
     public void clearUserPositive() {
