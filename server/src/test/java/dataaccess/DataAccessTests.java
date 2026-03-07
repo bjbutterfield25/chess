@@ -152,4 +152,19 @@ public class DataAccessTests {
     public void deleteGameNegative() {
         Assertions.assertDoesNotThrow(() -> gameDAO.deleteGame(0));
     }
+
+    @Test
+    public void joinGamePositive() throws DataAccessException {
+        GameData game = new GameData(0, null, null, "TestGame", new ChessGame());
+        GameData createResult = gameDAO.createGame(game);
+        gameDAO.joinGame(createResult.gameID(), "whiteUser", "blackUser");
+        GameData updatedGame = gameDAO.getGame(createResult.gameID());
+        Assertions.assertEquals("whiteUser", updatedGame.whiteUsername());
+        Assertions.assertEquals("blackUser", updatedGame.blackUsername());
+    }
+
+    @Test
+    public void joinGameNegative() {
+        Assertions.assertDoesNotThrow(() -> gameDAO.joinGame(0, "white", "black"));
+    }
 }
