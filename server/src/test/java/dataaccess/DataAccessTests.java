@@ -33,6 +33,17 @@ public class DataAccessTests {
     @Test
     public void createAuthPositive() throws DataAccessException {
         AuthData auth = new AuthData("token123","user");
+        Assertions.assertDoesNotThrow(() -> authDAO.createAuth(auth));
+    }
+
+    @Test
+    public void createAuthNegative() {
+        Assertions.assertThrows(Exception.class, () -> authDAO.createAuth(null));
+    }
+
+    @Test
+    public void getAuthPositive() throws DataAccessException {
+        AuthData auth = new AuthData("token123","user");
         authDAO.createAuth(auth);
         AuthData result = authDAO.getAuth("token123");
         Assertions.assertNotNull(result);
@@ -40,8 +51,11 @@ public class DataAccessTests {
     }
 
     @Test
-    public void createAuthNegative() {
-        Assertions.assertThrows(Exception.class, () -> authDAO.createAuth(null));
+    public void getAuthNegative() throws DataAccessException {
+        AuthData auth = new AuthData("token123","user");
+        authDAO.createAuth(auth);
+        AuthData result = authDAO.getAuth("token");
+        Assertions.assertNull(result);
     }
 
     //User Tests
