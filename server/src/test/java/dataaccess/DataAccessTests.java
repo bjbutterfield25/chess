@@ -58,6 +58,19 @@ public class DataAccessTests {
         Assertions.assertNull(result);
     }
 
+    @Test
+    public void deleteAuthPositive() throws DataAccessException {
+        AuthData auth = new AuthData("token123","user");
+        authDAO.createAuth(auth);
+        authDAO.deleteAuth("token123");
+        Assertions.assertNull(authDAO.getAuth("token123"));
+    }
+
+    @Test
+    public void deleteAuthNegative() {
+        Assertions.assertDoesNotThrow(() -> authDAO.deleteAuth("token123"));
+    }
+
     //User Tests
     @Test
     public void clearUserPositive() {
