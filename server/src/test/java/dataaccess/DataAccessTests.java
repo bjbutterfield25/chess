@@ -140,4 +140,16 @@ public class DataAccessTests {
         Assertions.assertNull(gameDAO.getGame(0));
     }
 
+    @Test
+    public void deleteGamePositive() throws DataAccessException {
+        GameData game = new GameData(0, null, null, "TestGame", new ChessGame());
+        GameData createResult = gameDAO.createGame(game);
+        gameDAO.deleteGame(createResult.gameID());
+        Assertions.assertNull(gameDAO.getGame(createResult.gameID()));
+    }
+
+    @Test
+    public void deleteGameNegative() {
+        Assertions.assertDoesNotThrow(() -> gameDAO.deleteGame(0));
+    }
 }
