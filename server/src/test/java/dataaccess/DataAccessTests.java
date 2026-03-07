@@ -126,4 +126,18 @@ public class DataAccessTests {
         Assertions.assertThrows(Exception.class, () -> gameDAO.createGame(null));
     }
 
+    @Test
+    public void getGamePositive() throws DataAccessException {
+        GameData game = new GameData(0, null, null, "TestGame", new ChessGame());
+        GameData createResult = gameDAO.createGame(game);
+        GameData getResult = gameDAO.getGame(createResult.gameID());
+        Assertions.assertNotNull(getResult);
+        Assertions.assertEquals(createResult.gameID(), getResult.gameID());
+    }
+
+    @Test
+    public void getGameNegative() throws DataAccessException {
+        Assertions.assertNull(gameDAO.getGame(0));
+    }
+
 }
