@@ -1,6 +1,8 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -109,4 +111,19 @@ public class DataAccessTests {
     public void clearGamePositive() {
         Assertions.assertDoesNotThrow(()->authDAO.clear());
     }
+
+    @Test
+    public void createGamePositive() throws DataAccessException {
+        GameData game = new GameData(0, null, null, "TestGame", new ChessGame());
+        GameData result = gameDAO.createGame(game);
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.gameID() > 0);
+        Assertions.assertEquals("TestGame", result.gameName());
+    }
+
+    @Test
+    public void createGameNegative() {
+        Assertions.assertThrows(Exception.class, () -> gameDAO.createGame(null));
+    }
+
 }
