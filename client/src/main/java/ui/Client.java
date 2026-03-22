@@ -46,6 +46,7 @@ public class Client {
                 case "login" -> login(params);
                 case "logout" -> logout();
                 case "create" -> create(params);
+                case "list" -> list();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -87,6 +88,20 @@ public class Client {
         }
         server.create(new CreateGameRequest(params[0]), authToken);
         return String.format("%s successfully created.\n", params[0]);
+    }
+
+    public String list() throws ResponseException {
+        var res = server.list(authToken);
+        var stringBuilder = new StringBuilder();
+        int count = 1;
+        for (var game: res.games()){
+            stringBuilder.append(String.format("%d. %s (White: %s, Black: %s)\n",
+                    count++,
+                    game.gameName(),
+                    game.whiteUsername() != null ? game.whiteUsername() : "AVAILABLE",
+                    game.blackUsername() != null ? game.blackUsername() : "AVAILABLE"));
+        }
+        return stringBuilder.toString();
     }
 
     public String help() {
