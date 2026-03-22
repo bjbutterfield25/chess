@@ -44,6 +44,7 @@ public class Client {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
+                case "logout" -> logout();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -70,6 +71,13 @@ public class Client {
         this.authToken = res.authToken();
         this.isSignedIn = true;
         return String.format("Logged in as %s.\n", res.username());
+    }
+
+    public String logout() throws ResponseException {
+        server.logout(authToken);
+        this.authToken = null;
+        this.isSignedIn = false;
+        return "Successfully logged out.\n";
     }
 
     public String help() {
