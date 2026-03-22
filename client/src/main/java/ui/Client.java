@@ -43,6 +43,7 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "register" -> register(params);
+                case "login" -> login(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -55,22 +56,27 @@ public class Client {
         if (params.length < 3) {
             return "Expected: <USERNAME> <PASSWORD> <EMAIL>\n";
         }
-
         var res = server.register(new RegisterRequest(params[0], params[1], params[2]));
-        updateState(res);
+        this.authToken = res.authToken();
+        this.isSignedIn = true;
         return String.format("Registered and logged in as %s.\n", res.username());
     }
 
-    public void updateState(RegisterResult res) {
+    public String login(String[] params) throws ResponseException {
+        if (params.length < 2) {
+            return "Expected: <USERNAME> <PASSWORD>\n";
+        }
+        var res = server.login(new LoginRequest(params[0], params[1]));
         this.authToken = res.authToken();
         this.isSignedIn = true;
+        return String.format("Logged in as %s.\n", res.username());
     }
 
     public String help() {
         if (!isSignedIn) {
             return """
                     - register <USERNAME> <PASSWORD> <EMAIL>- creates an account with username password and email
-                    - login - login with username and password to play chess
+                    - login <USERNAME> <PASSWORD>- login with username and password to play chess
                     - quit - quits the program
                     - help - lists possible commands to run
                     """;
