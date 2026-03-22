@@ -45,6 +45,7 @@ public class Client {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout();
+                case "create" -> create(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -80,6 +81,14 @@ public class Client {
         return "Successfully logged out.\n";
     }
 
+    public String create(String[] params) throws ResponseException {
+        if (params.length < 1) {
+            return "Expected: <NAME>\n";
+        }
+        server.create(new CreateGameRequest(params[0]), authToken);
+        return String.format("%s successfully created.\n", params[0]);
+    }
+
     public String help() {
         if (!isSignedIn) {
             return """
@@ -90,7 +99,7 @@ public class Client {
                     """;
         }
         return """
-                - create - create a chess game
+                - create <NAME> - create a chess game
                 - list - lists all chess games
                 - join - join a game as either a white or black player
                 - observe - observe a game
