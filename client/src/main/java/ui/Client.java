@@ -113,7 +113,12 @@ public class Client {
         if (params.length < 2) {
             return "Expected: <GAME NUMBER> <WHITE|BLACK>\n";
         }
-        int index = Integer.parseInt(params[0]) - 1;
+        int index;
+        try {
+            index = Integer.parseInt(params[0]) - 1;
+        } catch (NumberFormatException e) {
+            return "Invalid game number";
+        }
         if (index < 0 || index >= lastGames.size()) {
             return "Invalid game number\n";
         }
