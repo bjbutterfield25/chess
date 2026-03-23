@@ -8,21 +8,22 @@ public class ChessBoard {
     private static final String EMPTY = "   ";
 
 
-    public static void draw() {
+    public static void draw(boolean isWhite) {
         System.out.print(ERASE_SCREEN);
-        drawHeaders();
-        drawChessboard();
-        drawHeaders();
+        drawHeaders(isWhite);
+        drawChessboard(isWhite);
+        drawHeaders(isWhite);
         System.out.print(SET_BG_COLOR_BLACK);
         System.out.print(SET_TEXT_COLOR_WHITE);
     }
 
-    private static void drawHeaders() {
+    private static void drawHeaders(boolean isWhite) {
         setBlack();
         System.out.print("   ");
         String[] headers = { " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h " };
-        for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
-            printHeaderText(headers[boardCol]);
+        for (int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
+            int col = isWhite ? i : (BOARD_SIZE_IN_SQUARES - 1 - i);
+            printHeaderText(headers[col]);
         }
         System.out.println();
     }
@@ -34,19 +35,21 @@ public class ChessBoard {
         setBlack();
     }
 
-    private static void drawChessboard() {
-        for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; ++boardRow) {
-            drawRowOfSquares(boardRow);
+    private static void drawChessboard(boolean isWhite) {
+        for (int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
+            int boardRow = isWhite ? i : (BOARD_SIZE_IN_SQUARES - 1 - i);
+            drawRowOfSquares(boardRow, isWhite);
         }
     }
 
-    private static void drawRowOfSquares(int boardRow) {
+    private static void drawRowOfSquares(int boardRow, boolean isWhite) {
         int rank = BOARD_SIZE_IN_SQUARES - boardRow;
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; squareRow++) {
             setBlack();
             System.out.print(SET_TEXT_COLOR_GREEN + " " + rank + " ");
-            for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; boardCol++) {
-                if ((boardRow + boardCol) % 2 == 0) {
+            for (int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
+                int col = isWhite ? i : (BOARD_SIZE_IN_SQUARES - 1 - i);
+                if ((boardRow + col) % 2 == 0) {
                     setWhite();
                 } else {
                     setBlack();

@@ -118,9 +118,10 @@ public class Client {
             return "Invalid game number\n";
         }
         String color = params[1].toUpperCase();
+        boolean isWhite = color.equals("WHITE");
         var gameID = lastGames.get(index).gameID();
         server.join(new JoinGameRequest(color, gameID), authToken);
-        ChessBoard.draw();
+        ChessBoard.draw(isWhite);
         return String.format("Joined game %d as %s\n", index + 1, color);
     }
 
