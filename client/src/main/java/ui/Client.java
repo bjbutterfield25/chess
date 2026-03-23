@@ -18,7 +18,7 @@ public class Client {
     }
 
     public void run() {
-        System.out.println("Welcome to CS240 Chess. Type Help to get Started");
+        System.out.println("Welcome to CS240 Chess. Type help to get Started");
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
@@ -52,6 +52,7 @@ public class Client {
                 case "list" -> list();
                 case "join" -> join(params);
                 case "quit" -> "quit";
+                case "observe" -> observe(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -129,6 +130,25 @@ public class Client {
         GameData gameData = lastGames.get(index);
         ChessBoard.draw(isWhite, gameData.game());
         return String.format("Joined game %d as %s\n", index + 1, color);
+    }
+
+    public String observe(String[] params) {
+        if (params.length < 1) {
+            return "Expected: <GAME NUMBER>\n";
+        }
+        int index;
+        try {
+            index = Integer.parseInt(params[0]) - 1;
+        } catch (NumberFormatException e) {
+            return "Invalid number\n";
+        }
+        if (index < 0 || index >= lastGames.size()) {
+            return "Invalid game number\n";
+        }
+        boolean isWhite = true;
+        GameData gameData = lastGames.get(index);
+        ChessBoard.draw(isWhite, gameData.game());
+        return String.format("Observing game %s\n", gameData.gameName());
     }
 
     public String help() {
