@@ -13,18 +13,21 @@ public class ChessBoard {
         drawHeaders(isWhite);
         drawChessboard(isWhite);
         drawHeaders(isWhite);
-        System.out.print(SET_BG_COLOR_BLACK);
-        System.out.print(SET_TEXT_COLOR_WHITE);
+        System.out.print(RESET_BG_COLOR);
+        System.out.print(RESET_TEXT_COLOR);
+        System.out.println();
     }
 
     private static void drawHeaders(boolean isWhite) {
         setBlack();
-        System.out.print("   ");
+        System.out.print(EMPTY);
         String[] headers = { " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h " };
         for (int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
             int col = isWhite ? i : (BOARD_SIZE_IN_SQUARES - 1 - i);
             printHeaderText(headers[col]);
         }
+        System.out.print(EMPTY);
+        System.out.print(RESET_BG_COLOR);
         System.out.println();
     }
 
@@ -32,7 +35,6 @@ public class ChessBoard {
         System.out.print(SET_BG_COLOR_BLACK);
         System.out.print(SET_TEXT_COLOR_GREEN);
         System.out.print(headerText);
-        setBlack();
     }
 
     private static void drawChessboard(boolean isWhite) {
@@ -57,7 +59,9 @@ public class ChessBoard {
                 System.out.print(EMPTY);
             }
             setBlack();
-            System.out.println(SET_TEXT_COLOR_GREEN + " " + rank + " ");
+            System.out.print(SET_TEXT_COLOR_GREEN + " " + rank + " ");
+            System.out.print(RESET_BG_COLOR);
+            System.out.println();
         }
     }
 
