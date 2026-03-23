@@ -142,8 +142,8 @@ public class Client {
         return """
                 - create <NAME> - create a chess game
                 - list - lists all chess games
-                - join - join a game as either a white or black player
-                - observe - observe a game
+                - join <GAMEID> [WHITE|BLACK]- join a game as either a white or black player
+                - observe <GAMEID> - observe a game
                 - logout - logout of the server
                 - quit - quits the program
                 - help - lists possible commands to run
