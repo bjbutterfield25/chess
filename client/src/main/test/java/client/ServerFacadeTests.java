@@ -67,4 +67,17 @@ public class ServerFacadeTests {
     public void logoutNegative() {
         Assertions.assertThrows(ResponseException.class, () -> facade.logout("badauth"));
     }
+
+    @Test
+    public void createPositive() throws Exception {
+        var register = facade.register(new RegisterRequest("test", "test", "test@test.com"));
+        var result = facade.create(new CreateGameRequest("test"), register.authToken());
+        Assertions.assertNotNull(result);
+    }
+
+    @Test
+    public void createNegative() {
+        Assertions.assertThrows(ResponseException.class, () ->
+                facade.create(new CreateGameRequest("test"), "badauth"));
+    }
 }
