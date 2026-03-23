@@ -44,4 +44,16 @@ public class ServerFacadeTests {
         Assertions.assertThrows(ResponseException.class, () ->
                 facade.register(new RegisterRequest("test", "test", "test@test.com")));
     }
+
+    @Test
+    public void loginPositive() throws Exception {
+        facade.register(new RegisterRequest("test", "test", "test@test.com"));
+        var result = facade.login(new LoginRequest("test", "test"));
+        Assertions.assertNotNull(result.authToken());
+    }
+
+    @Test
+    public void loginNegative() {
+        Assertions.assertThrows(ResponseException.class, () -> facade.login(new LoginRequest("test", "test")));
+    }
 }
