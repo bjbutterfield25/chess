@@ -96,4 +96,18 @@ public class ServerFacadeTests {
     public void listNegative() {
         Assertions.assertThrows(ResponseException.class, () -> facade.list("badauth"));
     }
+
+    @Test
+    public void joinPositive() throws Exception {
+        var register = facade.register(new RegisterRequest("test", "test", "test@test.com"));
+        var result = facade.create(new CreateGameRequest("test"), register.authToken());
+        Assertions.assertDoesNotThrow(() -> facade.join(new JoinGameRequest("WHITE", result.gameID()), register.authToken()));
+    }
+
+    @Test
+    public void joinNegative() throws Exception {
+        var register = facade.register(new RegisterRequest("test", "test", "test@test.com"));
+        Assertions.assertThrows(ResponseException.class, () ->
+                facade.join(new JoinGameRequest("WHITE", 9999), register.authToken()));
+    }
 }
