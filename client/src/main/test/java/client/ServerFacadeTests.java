@@ -80,4 +80,20 @@ public class ServerFacadeTests {
         Assertions.assertThrows(ResponseException.class, () ->
                 facade.create(new CreateGameRequest("test"), "badauth"));
     }
+
+    @Test
+    public void listPositive() throws Exception {
+        var register = facade.register(new RegisterRequest("test", "test", "test@test.com"));
+        facade.create(new CreateGameRequest("test"), register.authToken());
+        facade.create(new CreateGameRequest("test2"), register.authToken());
+        facade.create(new CreateGameRequest("test3"), register.authToken());
+        var result = facade.list(register.authToken());
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(3, result.games().size());
+    }
+
+    @Test
+    public void listNegative() {
+        Assertions.assertThrows(ResponseException.class, () -> facade.list("badauth"));
+    }
 }
