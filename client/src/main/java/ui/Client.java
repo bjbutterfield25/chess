@@ -2,13 +2,16 @@ package ui;
 
 import model.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class Client {
     private boolean isSignedIn;
     private final ServerFacade server;
     private String authToken = null;
+    private List<GameData> lastGames = new ArrayList<>();
 
     public Client(String serverUrl){
         server = new ServerFacade(serverUrl);
@@ -47,6 +50,7 @@ public class Client {
                 case "logout" -> logout();
                 case "create" -> create(params);
                 case "list" -> list();
+                case "join" -> join(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -92,6 +96,7 @@ public class Client {
 
     public String list() throws ResponseException {
         var res = server.list(authToken);
+        lastGames = res.games();
         var stringBuilder = new StringBuilder();
         int count = 1;
         for (var game: res.games()){
@@ -102,6 +107,21 @@ public class Client {
                     game.blackUsername() != null ? game.blackUsername() : "AVAILABLE"));
         }
         return stringBuilder.toString();
+    }
+
+    public String join(String[] params) throws ResponseException {
+        if (params.length < 2) {
+            return "Expected: <GAME NUMBER> <WHITE|BLACK>\n";
+        }
+        int index = Integer.parseInt(params[0]) - 1;
+        if (index < 0 || index >= lastGames.size()) {
+            return "Invalid game number\n";
+        }
+        String color = params[1].toUpperCase();
+        var gameID = lastGames.get(index).gameID();
+        server.join(new JoinGameRequest(color, gameID), authToken);
+        ChessBoard.draw();
+        return String.format("Joined game %d as %s\n", index + 1, color);
     }
 
     public String help() {

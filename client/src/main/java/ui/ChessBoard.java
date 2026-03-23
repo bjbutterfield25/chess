@@ -8,7 +8,7 @@ public class ChessBoard {
     private static final String EMPTY = "   ";
 
 
-    public static void main(String[] args) {
+    public static void draw() {
         System.out.print(ERASE_SCREEN);
         drawHeaders();
         drawChessboard();
