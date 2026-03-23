@@ -126,7 +126,8 @@ public class Client {
         boolean isWhite = color.equals("WHITE");
         var gameID = lastGames.get(index).gameID();
         server.join(new JoinGameRequest(color, gameID), authToken);
-        ChessBoard.draw(isWhite);
+        GameData gameData = lastGames.get(index);
+        ChessBoard.draw(isWhite, gameData.game());
         return String.format("Joined game %d as %s\n", index + 1, color);
     }
 

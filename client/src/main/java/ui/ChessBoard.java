@@ -1,5 +1,9 @@
 package ui;
 
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
 import static ui.EscapeSequences.*;
 
 public class ChessBoard {
@@ -8,10 +12,11 @@ public class ChessBoard {
     private static final String EMPTY = "   ";
 
 
-    public static void draw(boolean isWhite) {
+    public static void draw(boolean isWhite, ChessGame game) {
+        chess.ChessBoard board = game.getBoard();
         System.out.print(ERASE_SCREEN);
         drawHeaders(isWhite);
-        drawChessboard(isWhite);
+        drawChessboard(isWhite, board);
         drawHeaders(isWhite);
         System.out.print(RESET_BG_COLOR);
         System.out.print(RESET_TEXT_COLOR);
@@ -37,14 +42,14 @@ public class ChessBoard {
         System.out.print(headerText);
     }
 
-    private static void drawChessboard(boolean isWhite) {
+    private static void drawChessboard(boolean isWhite, chess.ChessBoard board) {
         for (int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
             int boardRow = isWhite ? i : (BOARD_SIZE_IN_SQUARES - 1 - i);
-            drawRowOfSquares(boardRow, isWhite);
+            drawRowOfSquares(boardRow, isWhite, board);
         }
     }
 
-    private static void drawRowOfSquares(int boardRow, boolean isWhite) {
+    private static void drawRowOfSquares(int boardRow, boolean isWhite, chess.ChessBoard board) {
         int rank = BOARD_SIZE_IN_SQUARES - boardRow;
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; squareRow++) {
             setBlack();
@@ -56,13 +61,30 @@ public class ChessBoard {
                 } else {
                     setBlack();
                 }
-                System.out.print(EMPTY);
+                ChessPiece piece = board.getPiece(new ChessPosition(rank, col + 1));
+                System.out.print(renderPiece(piece));
             }
             setBlack();
             System.out.print(SET_TEXT_COLOR_GREEN + " " + rank + " ");
             System.out.print(RESET_BG_COLOR);
             System.out.println();
         }
+    }
+
+    private static String renderPiece(ChessPiece piece) {
+        if (piece == null) return EMPTY;
+        String color = (piece.getTeamColor() == ChessGame.TeamColor.WHITE)
+                ? SET_TEXT_COLOR_RED
+                : SET_TEXT_COLOR_BLUE;
+        String type = switch (piece.getPieceType()) {
+            case KING -> " K ";
+            case QUEEN -> " Q ";
+            case BISHOP -> " B ";
+            case KNIGHT -> " N ";
+            case ROOK -> " R ";
+            case PAWN -> " P ";
+        };
+        return color + type;
     }
 
     private static void setWhite() {
