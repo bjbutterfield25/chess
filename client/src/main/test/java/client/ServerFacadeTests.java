@@ -110,4 +110,9 @@ public class ServerFacadeTests {
         Assertions.assertThrows(ResponseException.class, () ->
                 facade.join(new JoinGameRequest("WHITE", 9999), register.authToken()));
     }
+
+    @Test
+    public void clearPositive() {
+        Assertions.assertDoesNotThrow(() -> facade.clear());
+    }
 }
