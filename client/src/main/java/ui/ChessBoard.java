@@ -72,7 +72,9 @@ public class ChessBoard {
     }
 
     private static String renderPiece(ChessPiece piece) {
-        if (piece == null) return EMPTY;
+        if (piece == null) {
+            return EMPTY;
+        }
         String color = (piece.getTeamColor() == ChessGame.TeamColor.WHITE)
                 ? SET_TEXT_COLOR_RED
                 : SET_TEXT_COLOR_BLUE;
