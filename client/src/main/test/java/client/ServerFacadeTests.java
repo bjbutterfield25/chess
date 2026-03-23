@@ -56,4 +56,15 @@ public class ServerFacadeTests {
     public void loginNegative() {
         Assertions.assertThrows(ResponseException.class, () -> facade.login(new LoginRequest("test", "test")));
     }
+
+    @Test
+    public void logoutPositive() throws Exception {
+        var register = facade.register(new RegisterRequest("test", "test", "test@test.com"));
+        Assertions.assertDoesNotThrow(() -> facade.logout(register.authToken()));
+    }
+
+    @Test
+    public void logoutNegative() {
+        Assertions.assertThrows(ResponseException.class, () -> facade.logout("badauth"));
+    }
 }
