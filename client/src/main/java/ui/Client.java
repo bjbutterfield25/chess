@@ -118,7 +118,7 @@ public class Client {
         try {
             index = Integer.parseInt(params[0]) - 1;
         } catch (NumberFormatException e) {
-            return "Invalid game number";
+            return "Invalid game number\n";
         }
         if (index < 0 || index >= lastGames.size()) {
             return "Invalid game number\n";
