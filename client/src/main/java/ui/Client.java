@@ -12,10 +12,13 @@ public class Client {
     private String authToken = null;
     private List<GameData> lastGames = new ArrayList<>();
     private State currentState;
+    private Boolean isWhite;
+    private GameData gameData;
 
     public Client(String serverUrl){
-        server = new ServerFacade(serverUrl);
-        currentState = State.LOGGED_OUT;
+        this.server = new ServerFacade(serverUrl);
+        this.currentState = State.LOGGED_OUT;
+        this.isWhite = true;
     }
 
     public void run() {
@@ -54,6 +57,7 @@ public class Client {
                 case "join" -> join(params);
                 case "quit" -> "quit";
                 case "observe" -> observe(params);
+                case "redraw" -> redraw();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -125,11 +129,11 @@ public class Client {
             return "Invalid game number\n";
         }
         String color = params[1].toUpperCase();
-        boolean isWhite = color.equals("WHITE");
+        isWhite = color.equals("WHITE");
         var gameID = lastGames.get(index).gameID();
         server.join(new JoinGameRequest(color, gameID), authToken);
         this.currentState = State.IN_GAME;
-        GameData gameData = lastGames.get(index);
+        gameData = lastGames.get(index);
         ChessBoard.draw(isWhite, gameData.game());
         return String.format("Joined game %d as %s\n", index + 1, color);
     }
@@ -148,10 +152,14 @@ public class Client {
             return "Invalid game number\n";
         }
         this.currentState = State.OBSERVING;
-        boolean isWhite = true;
-        GameData gameData = lastGames.get(index);
-        ChessBoard.draw(isWhite, gameData.game());
+        gameData = lastGames.get(index);
+        ChessBoard.draw(true, gameData.game());
         return String.format("Observing game %s\n", gameData.gameName());
+    }
+
+    public String redraw() {
+        ChessBoard.draw(isWhite, gameData.game());
+        return "";
     }
 
     public String help() {
