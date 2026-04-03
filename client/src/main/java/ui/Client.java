@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Client {
-    private boolean isSignedIn;
     private final ServerFacade server;
     private String authToken = null;
     private List<GameData> lastGames = new ArrayList<>();
+    private State currentState;
 
     public Client(String serverUrl){
         server = new ServerFacade(serverUrl);
+        currentState = State.LOGGED_OUT;
     }
 
     public void run() {
@@ -66,7 +67,7 @@ public class Client {
         }
         var res = server.register(new RegisterRequest(params[0], params[1], params[2]));
         this.authToken = res.authToken();
-        this.isSignedIn = true;
+        this.currentState = State.LOGGED_IN;
         return String.format("Registered and logged in as %s.\n", res.username());
     }
 
@@ -76,14 +77,14 @@ public class Client {
         }
         var res = server.login(new LoginRequest(params[0], params[1]));
         this.authToken = res.authToken();
-        this.isSignedIn = true;
+        this.currentState = State.LOGGED_IN;
         return String.format("Logged in as %s.\n", res.username());
     }
 
     public String logout() throws ResponseException {
         server.logout(authToken);
         this.authToken = null;
-        this.isSignedIn = false;
+        this.currentState = State.LOGGED_OUT;
         return "Successfully logged out.\n";
     }
 
@@ -127,6 +128,7 @@ public class Client {
         boolean isWhite = color.equals("WHITE");
         var gameID = lastGames.get(index).gameID();
         server.join(new JoinGameRequest(color, gameID), authToken);
+        this.currentState = State.IN_GAME;
         GameData gameData = lastGames.get(index);
         ChessBoard.draw(isWhite, gameData.game());
         return String.format("Joined game %d as %s\n", index + 1, color);
@@ -145,6 +147,7 @@ public class Client {
         if (index < 0 || index >= lastGames.size()) {
             return "Invalid game number\n";
         }
+        this.currentState = State.OBSERVING;
         boolean isWhite = true;
         GameData gameData = lastGames.get(index);
         ChessBoard.draw(isWhite, gameData.game());
@@ -152,7 +155,7 @@ public class Client {
     }
 
     public String help() {
-        if (!isSignedIn) {
+        if (this.currentState == State.LOGGED_OUT) {
             return """
                     - register <USERNAME> <PASSWORD> <EMAIL>- creates an account with username password and email
                     - login <USERNAME> <PASSWORD>- login with username and password to play chess
