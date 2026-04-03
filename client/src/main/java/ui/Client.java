@@ -1,11 +1,9 @@
 package ui;
 
+import chess.ChessMove;
+import chess.ChessPosition;
 import model.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Client {
     private final ServerFacade server;
@@ -14,6 +12,7 @@ public class Client {
     private State currentState;
     private Boolean isWhite;
     private GameData gameData;
+    private Collection<ChessPosition> highlightPositions = new ArrayList<>();
 
     public Client(String serverUrl){
         this.server = new ServerFacade(serverUrl);
@@ -58,6 +57,7 @@ public class Client {
                 case "quit" -> "quit";
                 case "observe" -> observe(params);
                 case "redraw" -> redraw();
+                case "highlight" -> highlight(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -134,7 +134,7 @@ public class Client {
         server.join(new JoinGameRequest(color, gameID), authToken);
         this.currentState = State.IN_GAME;
         gameData = lastGames.get(index);
-        ChessBoard.draw(isWhite, gameData.game());
+        ChessBoard.draw(isWhite, gameData.game(), highlightPositions, null);
         return String.format("Joined game %d as %s\n", index + 1, color);
     }
 
@@ -153,13 +153,49 @@ public class Client {
         }
         this.currentState = State.OBSERVING;
         gameData = lastGames.get(index);
-        ChessBoard.draw(true, gameData.game());
+        ChessBoard.draw(true, gameData.game(), highlightPositions, null);
         return String.format("Observing game %s\n", gameData.gameName());
     }
 
     public String redraw() {
-        ChessBoard.draw(isWhite, gameData.game());
+        ChessBoard.draw(isWhite, gameData.game(), highlightPositions, null);
         return "";
+    }
+
+    public String highlight(String[] params){
+        if (params.length < 1) {
+            return "Expected: <POSITION>\n";
+        }
+        ChessPosition selectedPosition;
+        try {
+            selectedPosition = parsePosition(params[0]);
+        } catch (IllegalArgumentException e) {
+            return "Invalid position.\n";
+        }
+        Collection<ChessMove> validMoves = gameData.game().validMoves(selectedPosition);
+        highlightPositions = new ArrayList<>();
+        if (validMoves != null) {
+            for (ChessMove move : validMoves) {
+                highlightPositions.add(move.getEndPosition());
+            }
+        }
+        ChessBoard.draw(isWhite, gameData.game(), highlightPositions, selectedPosition);
+        highlightPositions = new ArrayList<>();
+        return "";
+    }
+
+    public ChessPosition parsePosition(String input) {
+        if (input == null || input.length() != 2) {
+            throw new IllegalArgumentException("Invalid position");
+        }
+        char file = input.charAt(0);
+        char rank = input.charAt(1);
+        int col = file - 'a' + 1;
+        int row = rank - '0';
+        if (col < 1 || col > 8 || row < 1 || row > 8) {
+            throw new IllegalArgumentException("Invalid position");
+        }
+        return new ChessPosition(row, col);
     }
 
     public String help() {

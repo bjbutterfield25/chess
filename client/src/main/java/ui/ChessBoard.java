@@ -4,6 +4,8 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+import java.util.Collection;
+
 import static ui.EscapeSequences.*;
 
 public class ChessBoard {
@@ -12,11 +14,12 @@ public class ChessBoard {
     private static final String EMPTY = "   ";
 
 
-    public static void draw(boolean isWhite, ChessGame game) {
+    public static void draw(boolean isWhite, ChessGame game,
+                            Collection<ChessPosition> highlightPositions, ChessPosition selectedPosition) {
         chess.ChessBoard board = game.getBoard();
         System.out.print(ERASE_SCREEN);
         drawHeaders(isWhite);
-        drawChessboard(isWhite, board);
+        drawChessboard(isWhite, board, highlightPositions, selectedPosition);
         drawHeaders(isWhite);
         System.out.print(RESET_BG_COLOR);
         System.out.print(RESET_TEXT_COLOR);
@@ -42,26 +45,42 @@ public class ChessBoard {
         System.out.print(headerText);
     }
 
-    private static void drawChessboard(boolean isWhite, chess.ChessBoard board) {
+    private static void drawChessboard(boolean isWhite, chess.ChessBoard board,
+                                       Collection<ChessPosition> highlightPositions, ChessPosition selectedPosition) {
         for (int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
             int boardRow = isWhite ? i : (BOARD_SIZE_IN_SQUARES - 1 - i);
-            drawRowOfSquares(boardRow, isWhite, board);
+            drawRowOfSquares(boardRow, isWhite, board, highlightPositions, selectedPosition);
         }
     }
 
-    private static void drawRowOfSquares(int boardRow, boolean isWhite, chess.ChessBoard board) {
+    private static void drawRowOfSquares(int boardRow, boolean isWhite, chess.ChessBoard board,
+                                         Collection<ChessPosition> highlightPositions, ChessPosition selectedPosition) {
         int rank = BOARD_SIZE_IN_SQUARES - boardRow;
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; squareRow++) {
             setBlack();
             System.out.print(SET_TEXT_COLOR_GREEN + " " + rank + " ");
             for (int i = 0; i < BOARD_SIZE_IN_SQUARES; i++) {
                 int col = isWhite ? i : (BOARD_SIZE_IN_SQUARES - 1 - i);
-                if ((boardRow + col) % 2 == 0) {
-                    setWhite();
+                ChessPosition position = new ChessPosition(rank, col + 1);
+                boolean isSelected = selectedPosition != null && selectedPosition.equals(position);
+                boolean isHighlight = highlightPositions.contains(position);
+                boolean isLightSquare = (boardRow + col) % 2 == 0;
+                if (isSelected) {
+                    setSelected();
+                } else if (isHighlight) {
+                    if (isLightSquare) {
+                        setHighlightLight();
+                    } else {
+                        setHighlightDark();
+                    }
                 } else {
-                    setBlack();
+                    if (isLightSquare) {
+                        setWhite();
+                    } else {
+                        setBlack();
+                    }
                 }
-                ChessPiece piece = board.getPiece(new ChessPosition(rank, col + 1));
+                ChessPiece piece = board.getPiece(position);
                 System.out.print(renderPiece(piece));
             }
             setBlack();
@@ -96,6 +115,21 @@ public class ChessBoard {
 
     private static void setBlack() {
         System.out.print(SET_BG_COLOR_BLACK);
+        System.out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setHighlightLight() {
+        System.out.print(SET_BG_COLOR_GREEN);
+        System.out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setHighlightDark() {
+        System.out.print(SET_BG_COLOR_DARK_GREEN);
+        System.out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setSelected() {
+        System.out.print(SET_BG_COLOR_YELLOW);
         System.out.print(SET_TEXT_COLOR_BLACK);
     }
 }
