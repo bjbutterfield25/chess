@@ -162,15 +162,33 @@ public class Client {
                     - quit - quits the program
                     - help - lists possible commands to run
                     """;
+        } else if (this.currentState == State.LOGGED_IN) {
+            return """
+                    - create <NAME> - create a chess game
+                    - list - lists all chess games
+                    - join <GAMEID> [WHITE|BLACK]- join a game as either a white or black player
+                    - observe <GAMEID> - observe a game
+                    - logout - logout of the server
+                    - quit - quits the program
+                    - help - lists possible commands to run
+                    """;
         }
-        return """
-                - create <NAME> - create a chess game
-                - list - lists all chess games
-                - join <GAMEID> [WHITE|BLACK]- join a game as either a white or black player
-                - observe <GAMEID> - observe a game
-                - logout - logout of the server
-                - quit - quits the program
-                - help - lists possible commands to run
-                """;
+        else if (this.currentState == State.IN_GAME){
+            return """
+                    - redraw - redraws the chess board
+                    - leave - leaves the game
+                    - move <START_POSITION> <END_POSITION> - moves piece
+                    - highlight <POSITION> - highlights possible moves for the piece
+                    - resign - resigns the game
+                    - help - lists possible commands to run
+                    """;
+        } else {
+            return """
+                    - redraw - redraws the chess board
+                    - leave - stop observing the game
+                    - highlight <POSITION> - highlights possible moves for the piece
+                    - help - lists possible commands to run
+                    """;
+        }
     }
 }
