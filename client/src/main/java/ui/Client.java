@@ -2,10 +2,14 @@ package ui;
 
 import chess.ChessMove;
 import chess.ChessPosition;
+import client.websocket.NotificationHandler;
+import client.websocket.WebSocketFacade;
 import model.*;
+import websocket.messages.ServerMessage;
+
 import java.util.*;
 
-public class Client {
+public class Client implements NotificationHandler {
     private final ServerFacade server;
     private String authToken = null;
     private List<GameData> lastGames = new ArrayList<>();
@@ -13,11 +17,19 @@ public class Client {
     private Boolean isWhite;
     private GameData gameData;
     private Collection<ChessPosition> highlightPositions = new ArrayList<>();
+    private WebSocketFacade ws;
+    private NotificationHandler notificationHandler;
 
-    public Client(String serverUrl){
+    public Client(String serverUrl) throws ResponseException {
         this.server = new ServerFacade(serverUrl);
         this.currentState = State.LOGGED_OUT;
         this.isWhite = true;
+        ws = new WebSocketFacade(serverUrl, this);
+    }
+
+    public void notify(ServerMessage notification) {
+        System.out.println();
+        printPrompt();
     }
 
     public void run() {
