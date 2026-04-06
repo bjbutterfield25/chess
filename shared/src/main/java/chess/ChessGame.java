@@ -13,9 +13,11 @@ import java.util.Objects;
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard currentBoard;
+    private boolean isFinished;
     public ChessGame() {
         this.currentBoard = new ChessBoard();
         currentBoard.resetBoard();
+        isFinished = false;
         this.teamTurn = TeamColor.WHITE;
     }
 
@@ -261,6 +263,15 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return currentBoard;
     }
+
+    public void setFinished(){
+        isFinished = true;
+    }
+
+    public boolean getFinished(){
+        return isFinished;
+    }
+
 
     @Override
     public boolean equals(Object o) {
