@@ -14,6 +14,7 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import model.AuthData;
 import service.UserService;
+import websocket.commands.ConnectCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(WsMessageContext ctx) throws IOException {
         try {
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-            String username = "";
+            String username;
             try {
                 UserService userService = new UserService();
                 AuthData authData = userService.getAuthData(command.getAuthToken());
@@ -45,7 +46,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 throw new RuntimeException("Unauthorized");
             }
             switch (command.getCommandType()) {
-                case CONNECT -> connect(ctx.session, username, command.getGameID());
+                case CONNECT -> connect(ctx.session, username, new Gson().fromJson(ctx.message(), ConnectCommand.class));
             }
         } catch (IOException | DataAccessException ex) {
             ctx.session.getRemote().sendString(new Gson().toJson(new ErrorMessage(ex.getMessage())));
@@ -57,13 +58,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    public void connect(Session session, String username, int gameID) throws IOException, DataAccessException {
-        connections.add(username, session, gameID);
-        var message = String.format("%s joined the game", username);
+    public void connect(Session session, String username, ConnectCommand connectCommand) throws IOException, DataAccessException {
+        GameDAO gameDAO = new SQLGameDAO();
+        GameData game = gameDAO.getGame(connectCommand.getGameID());
+        if (game == null) {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid game")));
+            return;
+        }
+        connections.add(username, session, connectCommand.getGameID());
+        var message = String.format("%s joined the game as %s", username, connectCommand.teamColor);
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification);
-        GameDAO gameDAO = new SQLGameDAO();
-        GameData game = gameDAO.getGame(gameID);
         session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game)));
     }
 

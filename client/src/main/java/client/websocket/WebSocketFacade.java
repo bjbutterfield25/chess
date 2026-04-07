@@ -1,8 +1,10 @@
 package client.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import ui.ResponseException;
 import jakarta.websocket.*;
+import websocket.commands.ConnectCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 import websocket.messages.ServerMessage;
@@ -53,10 +55,10 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void connect(String authToken, int gameID) throws ResponseException {
+    public void connect(String authToken, int gameID, ChessGame.TeamColor teamColor) throws ResponseException {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
-            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+            var command = new ConnectCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, teamColor);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
             throw new ResponseException(ex.getMessage());
         }

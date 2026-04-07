@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import client.websocket.NotificationHandler;
@@ -48,14 +49,20 @@ public class Client implements NotificationHandler {
 
     public void run() {
         System.out.println("Welcome to CS240 Chess. Type help to get Started");
+        printPrompt();
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
-            printPrompt();
             String line = scanner.nextLine();
             try {
                 result = eval(line);
-                System.out.print(result);
+                if (result.equalsIgnoreCase("quit")){
+                    System.out.print(result);
+                    break;
+                } else if (!result.isEmpty()) {
+                    System.out.print(result);
+                    printPrompt();
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -155,12 +162,17 @@ public class Client implements NotificationHandler {
             return "Invalid game number\n";
         }
         String color = params[1].toUpperCase();
-        isWhite = color.equals("WHITE");
+        chess.ChessGame.TeamColor teamColor;
+        if (color.equals("WHITE")){
+            teamColor = ChessGame.TeamColor.WHITE;
+        } else {
+            teamColor = ChessGame.TeamColor.BLACK;
+        }
         var gameID = lastGames.get(index).gameID();
         server.join(new JoinGameRequest(color, gameID), authToken);
         this.currentState = State.IN_GAME;
         gameData = lastGames.get(index);
-        ws.connect(authToken, gameID);
+        ws.connect(authToken, gameID, teamColor);
         return "";
     }
 
@@ -189,6 +201,7 @@ public class Client implements NotificationHandler {
 
     public String redraw() {
         ChessBoard.draw(isWhite, gameData.game(), highlightPositions, null);
+        printPrompt();
         return "";
     }
 
