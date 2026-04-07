@@ -189,7 +189,7 @@ public class Client implements NotificationHandler {
         ChessBoard.draw(isWhite, game.game(), highlightPositions, null);
     }
 
-    public String observe(String[] params) {
+    public String observe(String[] params) throws ResponseException {
         if (params.length < 1) {
             return "Expected: <GAME NUMBER>\n";
         }
@@ -203,9 +203,9 @@ public class Client implements NotificationHandler {
             return "Invalid game number\n";
         }
         this.currentState = State.OBSERVING;
-        gameData = lastGames.get(index);
-        ChessBoard.draw(true, gameData.game(), highlightPositions, null);
-        return String.format("Observing game %s\n", gameData.gameName());
+        gameID = lastGames.get(index).gameID();
+        ws.connect(authToken, gameID, null);
+        return "";
     }
 
     public String redraw() {

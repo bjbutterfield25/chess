@@ -67,7 +67,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
         connections.add(username, session, connectCommand.getGameID(), connectCommand.teamColor);
-        var message = String.format("%s joined the game as %s", username, connectCommand.teamColor);
+        String message;
+        if (connectCommand.teamColor != null){
+            message = String.format("%s joined the game as %s", username, connectCommand.teamColor);
+        } else {
+            message = String.format("%s is observing the game", username);
+        }
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification);
         session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game)));
