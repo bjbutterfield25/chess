@@ -33,6 +33,11 @@ public class Client implements NotificationHandler {
                 NotificationMessage notificationMessage = (NotificationMessage) notification;
                 System.out.println(notificationMessage.getMessage());
                 break;
+            case LOAD_GAME:
+                LoadGameMessage loadGameNotification = (LoadGameMessage) notification;
+                System.out.println();
+                drawGame(loadGameNotification.getGame());
+                break;
             case ERROR:
                 ErrorMessage errorMessage = (ErrorMessage) notification;
                 System.out.println(errorMessage.getMessage());
@@ -156,8 +161,11 @@ public class Client implements NotificationHandler {
         this.currentState = State.IN_GAME;
         gameData = lastGames.get(index);
         ws.connect(authToken, gameID);
-        ChessBoard.draw(isWhite, gameData.game(), highlightPositions, null);
-        return String.format("Joined game %d as %s\n", index + 1, color);
+        return "";
+    }
+
+    public void drawGame(GameData game){
+        ChessBoard.draw(isWhite, game.game(), highlightPositions, null);
     }
 
     public String observe(String[] params) {

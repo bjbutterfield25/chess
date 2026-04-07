@@ -2,12 +2,15 @@ package server.websocket;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import dataaccess.GameDAO;
+import dataaccess.SQLGameDAO;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import model.AuthData;
 import service.UserService;
@@ -40,7 +43,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx.session, username, command.getGameID());
             }
-        } catch (IOException ex) {
+        } catch (IOException | DataAccessException ex) {
             ctx.session.getRemote().sendString(new Gson().toJson(new ErrorMessage(ex.getMessage())));
         }
     }
@@ -50,11 +53,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    public void connect(Session session, String username, int gameID) throws IOException {
+    public void connect(Session session, String username, int gameID) throws IOException, DataAccessException {
         connections.add(username, session, gameID);
         var message = String.format("%s joined the game", username);
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification);
+        GameDAO gameDAO = new SQLGameDAO();
+        GameData game = gameDAO.getGame(gameID);
+        session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game)));
     }
 
 }
