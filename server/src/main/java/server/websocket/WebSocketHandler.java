@@ -117,11 +117,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
         ChessGame game = gameData.game();
+        if (game.getFinished()){
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: game is finished")));
+            return;
+        }
         if (Objects.equals(username, game.getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername())){
             try {
                 game.makeMove(command.getMove());
                 updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());
                 connections.broadcast(null, new LoadGameMessage(gameData));
+                var message = String.format("%s made the following move:\n" + command.getMove().toString(), username);
+                var notification = new NotificationMessage(message);
+                connections.broadcast(session, notification);
             } catch (InvalidMoveException e) {
                 session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid move")));
             }
