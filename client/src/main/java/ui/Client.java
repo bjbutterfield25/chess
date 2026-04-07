@@ -19,6 +19,7 @@ public class Client implements NotificationHandler {
     private GameData gameData;
     private Collection<ChessPosition> highlightPositions = new ArrayList<>();
     private final WebSocketFacade ws;
+    private int gameID;
 
     public Client(String serverUrl) throws ResponseException {
         this.server = new ServerFacade(serverUrl);
@@ -91,6 +92,7 @@ public class Client implements NotificationHandler {
                 case "observe" -> observe(params);
                 case "redraw" -> redraw();
                 case "highlight" -> highlight(params);
+                case "leave" -> leave();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -168,12 +170,19 @@ public class Client implements NotificationHandler {
         } else {
             teamColor = ChessGame.TeamColor.BLACK;
         }
-        var gameID = lastGames.get(index).gameID();
+        isWhite = teamColor.equals(ChessGame.TeamColor.WHITE);
+        gameID = lastGames.get(index).gameID();
         server.join(new JoinGameRequest(color, gameID), authToken);
         this.currentState = State.IN_GAME;
         gameData = lastGames.get(index);
         ws.connect(authToken, gameID, teamColor);
         return "";
+    }
+
+    public String leave() throws ResponseException {
+        ws.leave(authToken, gameID);
+        currentState = State.LOGGED_IN;
+        return "Successfully left the game\n";
     }
 
     public void drawGame(GameData game){

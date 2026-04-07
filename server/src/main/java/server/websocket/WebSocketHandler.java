@@ -1,5 +1,6 @@
 package server.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
@@ -47,6 +48,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             }
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx.session, username, new Gson().fromJson(ctx.message(), ConnectCommand.class));
+                case LEAVE -> leave(ctx.session, username, new Gson().fromJson(ctx.message(), UserGameCommand.class));
             }
         } catch (IOException | DataAccessException ex) {
             ctx.session.getRemote().sendString(new Gson().toJson(new ErrorMessage(ex.getMessage())));
@@ -59,17 +61,53 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void connect(Session session, String username, ConnectCommand connectCommand) throws IOException, DataAccessException {
-        GameDAO gameDAO = new SQLGameDAO();
-        GameData game = gameDAO.getGame(connectCommand.getGameID());
+        GameData game = getGame(connectCommand.getGameID());
         if (game == null) {
             session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid game")));
             return;
         }
-        connections.add(username, session, connectCommand.getGameID());
+        connections.add(username, session, connectCommand.getGameID(), connectCommand.teamColor);
         var message = String.format("%s joined the game as %s", username, connectCommand.teamColor);
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification);
         session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game)));
     }
 
+    public void leave(Session session, String username, UserGameCommand command) throws IOException, DataAccessException {
+        GameData game = getGame(command.getGameID());
+        if (game == null) {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid game")));
+            return;
+        }
+        var connection = connections.getConnection(username);
+        ChessGame.TeamColor color = connection.teamColor();
+        String whiteUsername, blackUsername;
+        if (color != null) {
+            if (color.equals(ChessGame.TeamColor.WHITE)) {
+                whiteUsername = null;
+                blackUsername = game.blackUsername();
+            } else if (color.equals(ChessGame.TeamColor.BLACK)) {
+                blackUsername = null;
+                whiteUsername = game.whiteUsername();
+            } else {
+                blackUsername = game.blackUsername();
+                whiteUsername = game.whiteUsername();
+            }
+            updateGame(command.getGameID(), whiteUsername, blackUsername);
+        }
+        var message = String.format("%s left the game", username);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(session, notification);
+        connections.remove(username);
+    }
+
+    public GameData getGame(int gameID) throws DataAccessException {
+        GameDAO gameDAO = new SQLGameDAO();
+        return gameDAO.getGame(gameID);
+    }
+
+    public void updateGame(int gameID, String whiteUsername, String blackUsername) throws DataAccessException {
+        GameDAO gameDAO = new SQLGameDAO();
+        gameDAO.joinGame(gameID, whiteUsername, blackUsername);
+    }
 }
