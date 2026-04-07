@@ -36,6 +36,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             try {
                 UserService userService = new UserService();
                 AuthData authData = userService.getAuthData(command.getAuthToken());
+                if (authData == null){
+                    ctx.session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: unauthorized")));
+                    return;
+                }
                 username = authData.username();
             } catch (DataAccessException e) {
                 throw new RuntimeException("Unauthorized");
