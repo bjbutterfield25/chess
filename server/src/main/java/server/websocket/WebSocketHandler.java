@@ -132,6 +132,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } catch (InvalidMoveException e) {
                 session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid move")));
             }
+        } else {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: not your turn or you are observing the game")));
         }
     }
 
