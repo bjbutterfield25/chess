@@ -1,8 +1,6 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
+import chess.*;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.*;
@@ -20,6 +18,7 @@ public class Client implements NotificationHandler {
     private Collection<ChessPosition> highlightPositions = new ArrayList<>();
     private final WebSocketFacade ws;
     private int gameID;
+    private chess.ChessGame.TeamColor teamColor;
 
     public Client(String serverUrl) throws ResponseException {
         this.server = new ServerFacade(serverUrl);
@@ -93,6 +92,7 @@ public class Client implements NotificationHandler {
                 case "redraw" -> redraw();
                 case "highlight" -> highlight(params);
                 case "leave" -> leave();
+                case "move" -> makemove(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -164,7 +164,6 @@ public class Client implements NotificationHandler {
             return "Invalid game number\n";
         }
         String color = params[1].toUpperCase();
-        chess.ChessGame.TeamColor teamColor;
         if (color.equals("WHITE")){
             teamColor = ChessGame.TeamColor.WHITE;
         } else {
@@ -236,6 +235,60 @@ public class Client implements NotificationHandler {
         return "";
     }
 
+    public String makemove(String[] params) throws ResponseException {
+        if (params.length < 2 || params.length > 3) {
+            return "Expected: <START_POSITION> <END_POSITION> <PROMOTION_PIECE>";
+        }
+        if (gameData.game().getFinished()){
+            return "The game is already over";
+        }
+        ChessPosition startPosition, endPosition;
+        ChessPiece.PieceType pieceType = null;
+        try {
+            startPosition = parsePosition(params[0]);
+            endPosition = parsePosition(params[1]);
+        } catch (IllegalArgumentException e) {
+            return "Invalid position.\n";
+        }
+        if (params.length == 3) {
+            pieceType = convertToPieceType(params[2]);
+        }
+        ChessMove move = new ChessMove(startPosition, endPosition, pieceType);
+        if (gameData.game().getTeamTurn() != teamColor) {
+            return "It is not your turn";
+        }
+        try {
+            gameData.game().makeMove(move);
+            ws.makemove(authToken, gameID, move);
+        } catch (InvalidMoveException e) {
+            throw new ResponseException(e.getMessage());
+        }
+        return "";
+    }
+
+    public ChessPiece.PieceType convertToPieceType(String pieceType){
+        switch(pieceType.toLowerCase()){
+            case "queen" -> {
+                return ChessPiece.PieceType.QUEEN;
+            }
+            case "king" -> {
+                return ChessPiece.PieceType.KING;
+            }
+            case "rook" -> {
+                return ChessPiece.PieceType.ROOK;
+            }
+            case "knight" -> {
+                return ChessPiece.PieceType.KNIGHT;
+            }
+            case "bishop" -> {
+                return ChessPiece.PieceType.BISHOP;
+            }
+            default -> {
+                return ChessPiece.PieceType.PAWN;
+            }
+        }
+    }
+
     public ChessPosition parsePosition(String input) {
         if (input == null || input.length() != 2) {
             throw new IllegalArgumentException("Invalid position");
@@ -273,7 +326,7 @@ public class Client implements NotificationHandler {
             return """
                     - redraw - redraws the chess board
                     - leave - leaves the game
-                    - move <START_POSITION> <END_POSITION> - moves piece
+                    - move <START_POSITION> <END_POSITION> <PROMOTION_PIECE>- moves piece. Promotion piece is optional
                     - highlight <POSITION> - highlights possible moves for the piece
                     - resign - resigns the game
                     - help - lists possible commands to run

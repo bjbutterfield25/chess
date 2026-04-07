@@ -51,6 +51,12 @@ public class SQLGameDAO implements GameDAO {
         DatabaseManager.executeUpdate(statement, whiteUsername, blackUsername, gameID);
     }
 
+    public void updateGame(int gameID, ChessGame gameData, String whiteUsername, String blackUsername) throws DataAccessException {
+        var statement = "UPDATE games SET whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID = ?";
+        var game = new Gson().toJson(gameData);
+        DatabaseManager.executeUpdate(statement, whiteUsername, blackUsername, game, gameID);
+    }
+
     public ArrayList<GameData> listGames() throws DataAccessException {
         ArrayList<GameData> allGames = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {

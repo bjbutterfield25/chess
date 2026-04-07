@@ -1,6 +1,7 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
@@ -16,9 +17,11 @@ import org.eclipse.jetty.websocket.api.Session;
 import model.AuthData;
 import service.UserService;
 import websocket.commands.ConnectCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 import java.io.IOException;
+import java.util.Objects;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -49,6 +52,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx.session, username, new Gson().fromJson(ctx.message(), ConnectCommand.class));
                 case LEAVE -> leave(ctx.session, username, new Gson().fromJson(ctx.message(), UserGameCommand.class));
+                case MAKE_MOVE -> makemove(ctx.session, username, new Gson().fromJson(ctx.message(), MakeMoveCommand.class));
             }
         } catch (IOException | DataAccessException ex) {
             ctx.session.getRemote().sendString(new Gson().toJson(new ErrorMessage(ex.getMessage())));
@@ -98,7 +102,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 blackUsername = game.blackUsername();
                 whiteUsername = game.whiteUsername();
             }
-            updateGame(command.getGameID(), whiteUsername, blackUsername);
+            updateGameUsers(command.getGameID(), whiteUsername, blackUsername);
         }
         var message = String.format("%s left the game", username);
         var notification = new NotificationMessage(message);
@@ -106,13 +110,36 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.remove(username);
     }
 
+    public void makemove(Session session, String username, MakeMoveCommand command) throws IOException, DataAccessException {
+        GameData gameData = getGame(command.getGameID());
+        if (gameData == null) {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid game")));
+            return;
+        }
+        ChessGame game = gameData.game();
+        if (Objects.equals(username, game.getTeamTurn() == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername())){
+            try {
+                game.makeMove(command.getMove());
+                updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());
+                connections.broadcast(null, new LoadGameMessage(gameData));
+            } catch (InvalidMoveException e) {
+                session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid move")));
+            }
+        }
+    }
+
     public GameData getGame(int gameID) throws DataAccessException {
         GameDAO gameDAO = new SQLGameDAO();
         return gameDAO.getGame(gameID);
     }
 
-    public void updateGame(int gameID, String whiteUsername, String blackUsername) throws DataAccessException {
+    public void updateGameUsers(int gameID, String whiteUsername, String blackUsername) throws DataAccessException {
         GameDAO gameDAO = new SQLGameDAO();
         gameDAO.joinGame(gameID, whiteUsername, blackUsername);
+    }
+
+    public void updateGame(int gameID, ChessGame game, String whiteUsername, String blackUsername) throws DataAccessException {
+        GameDAO gameDAO = new SQLGameDAO();
+        gameDAO.updateGame(gameID, game, whiteUsername, blackUsername);
     }
 }

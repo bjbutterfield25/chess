@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
 import java.util.ArrayList;
@@ -33,6 +34,10 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     public void joinGame(int i, String whiteUsername, String blackUsername) throws DataAccessException {
+        //doesn't do anything because it had to be added when the method was added for SQLGameDAO
+    }
+
+    public void updateGame(int gameID, ChessGame gameData, String whiteUsername, String blackUsername) throws DataAccessException {
         //doesn't do anything because it had to be added when the method was added for SQLGameDAO
     }
 }
