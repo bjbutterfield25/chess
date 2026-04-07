@@ -3,6 +3,8 @@ package client.websocket;
 import com.google.gson.Gson;
 import ui.ResponseException;
 import jakarta.websocket.*;
+import websocket.commands.UserGameCommand;
+import websocket.messages.*;
 import websocket.messages.ServerMessage;
 import java.io.IOException;
 import java.net.URI;
@@ -28,7 +30,14 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    notificationHandler.notify(notification);
+                    switch (notification.getServerMessageType()) {
+                        case NOTIFICATION:
+                            notificationHandler.notify(new Gson().fromJson(message, NotificationMessage.class));
+                            break;
+                        case ERROR:
+                            notificationHandler.notify(new Gson().fromJson(message, ErrorMessage.class));
+                            break;
+                    }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -41,5 +50,13 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
+    public void connect(String authToken, int gameID) throws ResponseException {
+        try {
+            var action = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(ex.getMessage());
+        }
+    }
 
 }

@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
+import server.websocket.WebSocketHandler;
 
 import java.util.Map;
 
@@ -12,6 +13,7 @@ public class Server {
 
     private final Javalin javalin;
     private final ServerHandler handler;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         try {
@@ -19,6 +21,7 @@ public class Server {
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
+        webSocketHandler = new WebSocketHandler();
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
@@ -29,6 +32,11 @@ public class Server {
         createGameEndpoint(javalin);
         joinGameEndpoint(javalin);
         listGamesEndpoint(javalin);
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
     }
 
     public int run(int desiredPort) {

@@ -5,7 +5,7 @@ import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import model.*;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 import java.util.*;
 
@@ -17,8 +17,7 @@ public class Client implements NotificationHandler {
     private Boolean isWhite;
     private GameData gameData;
     private Collection<ChessPosition> highlightPositions = new ArrayList<>();
-    private WebSocketFacade ws;
-    private NotificationHandler notificationHandler;
+    private final WebSocketFacade ws;
 
     public Client(String serverUrl) throws ResponseException {
         this.server = new ServerFacade(serverUrl);
@@ -27,8 +26,18 @@ public class Client implements NotificationHandler {
         ws = new WebSocketFacade(serverUrl, this);
     }
 
+    @Override
     public void notify(ServerMessage notification) {
-        System.out.println();
+        switch (notification.getServerMessageType()) {
+            case NOTIFICATION:
+                NotificationMessage notificationMessage = (NotificationMessage) notification;
+                System.out.println(notificationMessage.getMessage());
+                break;
+            case ERROR:
+                ErrorMessage errorMessage = (ErrorMessage) notification;
+                System.out.println(errorMessage.getMessage());
+                break;
+        }
         printPrompt();
     }
 
@@ -146,6 +155,7 @@ public class Client implements NotificationHandler {
         server.join(new JoinGameRequest(color, gameID), authToken);
         this.currentState = State.IN_GAME;
         gameData = lastGames.get(index);
+        ws.connect(authToken, gameID);
         ChessBoard.draw(isWhite, gameData.game(), highlightPositions, null);
         return String.format("Joined game %d as %s\n", index + 1, color);
     }
