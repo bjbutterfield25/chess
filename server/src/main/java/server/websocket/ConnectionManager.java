@@ -24,11 +24,11 @@ public class ConnectionManager {
         return connections.get(username);
     }
 
-    public void broadcast(Session excludeSession, ServerMessage notification) throws IOException {
+    public void broadcast(Session excludeSession, ServerMessage notification, int gameID) throws IOException {
         String msg = new Gson().toJson(notification);
         for (var c : connections.values()) {
             if (c.session().isOpen()) {
-                if (!c.session().equals(excludeSession)) {
+                if (!c.session().equals(excludeSession) && c.gameID() == gameID) {
                     c.session().getRemote().sendString(msg);
                 }
             }

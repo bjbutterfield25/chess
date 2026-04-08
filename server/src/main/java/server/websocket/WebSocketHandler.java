@@ -79,7 +79,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             message = String.format("%s is observing the game", username);
         }
         var notification = new NotificationMessage(message);
-        connections.broadcast(session, notification);
+        connections.broadcast(session, notification, connectCommand.getGameID());
         session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game)));
     }
 
@@ -107,7 +107,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         var message = String.format("%s left the game", username);
         var notification = new NotificationMessage(message);
-        connections.broadcast(session, notification);
+        connections.broadcast(session, notification, command.getGameID());
         connections.remove(username);
     }
 
@@ -126,26 +126,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             try {
                 game.makeMove(command.getMove());
                 updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());
-                connections.broadcast(null, new LoadGameMessage(gameData));
+                connections.broadcast(null, new LoadGameMessage(gameData), command.getGameID());
                 var message = String.format("%s made the following move:\n" + command.getMove().toString(), username);
                 var notification = new NotificationMessage(message);
-                connections.broadcast(session, notification);
+                connections.broadcast(session, notification, command.getGameID());
                 if (game.isInCheck(game.getTeamTurn())){
                     var checkMessage = String.format("%s is in check",
                             game.getTeamTurn().equals(ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername());
-                    connections.broadcast(null, new NotificationMessage(checkMessage));
+                    connections.broadcast(null, new NotificationMessage(checkMessage), command.getGameID());
                 } else if (game.isInCheckmate(game.getTeamTurn())){
                     var checkmateMessage = String.format("%s is in checkmate",
                             game.getTeamTurn().equals(ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername());
                     game.setFinished();
                     updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());
-                    connections.broadcast(null, new NotificationMessage(checkmateMessage));
+                    connections.broadcast(null, new NotificationMessage(checkmateMessage), command.getGameID());
                 } else if (game.isInStalemate(game.getTeamTurn())){
                     var stalemateMessage = String.format("%s and %s are in stalemate",
                             gameData.whiteUsername(), gameData.blackUsername());
                     game.setFinished();
                     updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());
-                    connections.broadcast(null, new NotificationMessage(stalemateMessage));
+                    connections.broadcast(null, new NotificationMessage(stalemateMessage), command.getGameID());
                 }
             } catch (InvalidMoveException e) {
                 session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid move")));
@@ -170,7 +170,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var resignMessage = String.format("%s resigned", username);
             game.setFinished();
             updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());
-            connections.broadcast(null, new NotificationMessage(resignMessage));
+            connections.broadcast(null, new NotificationMessage(resignMessage), command.getGameID());
         } else {
             session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: cannot resign")));
         }
