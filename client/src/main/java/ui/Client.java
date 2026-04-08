@@ -138,46 +138,56 @@ public class Client implements NotificationHandler {
     }
 
     public String list() throws ResponseException {
-        var res = server.list(authToken);
-        lastGames = res.games();
-        var stringBuilder = new StringBuilder();
-        int count = 1;
-        for (var game: res.games()){
-            stringBuilder.append(String.format("%d. %s (White: %s, Black: %s)\n",
-                    count++,
-                    game.gameName(),
-                    game.whiteUsername() != null ? game.whiteUsername() : "AVAILABLE",
-                    game.blackUsername() != null ? game.blackUsername() : "AVAILABLE"));
+        if (currentState.equals(State.LOGGED_IN)) {
+            var res = server.list(authToken);
+            lastGames = res.games();
+            var stringBuilder = new StringBuilder();
+            int count = 1;
+            for (var game: res.games()){
+                stringBuilder.append(String.format("%d. %s (White: %s, Black: %s)\n",
+                        count++,
+                        game.gameName(),
+                        game.whiteUsername() != null ? game.whiteUsername() : "AVAILABLE",
+                        game.blackUsername() != null ? game.blackUsername() : "AVAILABLE"));
+            }
+            return stringBuilder.toString();
+        } else if (currentState.equals(State.OBSERVING) || currentState.equals(State.IN_GAME)) {
+            return "You are already in a game\n";
+        } else {
+            return "You must log in\n";
         }
-        return stringBuilder.toString();
     }
 
     public String join(String[] params) throws ResponseException {
-        if (params.length < 2) {
-            return "Expected: <GAME NUMBER> <WHITE|BLACK>\n";
-        }
-        int index;
-        try {
-            index = Integer.parseInt(params[0]) - 1;
-        } catch (NumberFormatException e) {
-            return "Invalid game number\n";
-        }
-        if (index < 0 || index >= lastGames.size()) {
-            return "Invalid game number\n";
-        }
-        String color = params[1].toUpperCase();
-        if (color.equals("WHITE")){
-            teamColor = ChessGame.TeamColor.WHITE;
+        if (currentState.equals(State.LOGGED_IN)) {
+            if (params.length < 2) {
+                return "Expected: <GAME NUMBER> <WHITE|BLACK>\n";
+            }
+            int index;
+            try {
+                index = Integer.parseInt(params[0]) - 1;
+            } catch (NumberFormatException e) {
+                return "Invalid game number\n";
+            }
+            if (index < 0 || index >= lastGames.size()) {
+                return "Invalid game number\n";
+            }
+            String color = params[1].toUpperCase();
+            if (color.equals("WHITE")){
+                teamColor = ChessGame.TeamColor.WHITE;
+            } else {
+                teamColor = ChessGame.TeamColor.BLACK;
+            }
+            isWhite = teamColor.equals(ChessGame.TeamColor.WHITE);
+            gameID = lastGames.get(index).gameID();
+            server.join(new JoinGameRequest(color, gameID), authToken);
+            this.currentState = State.IN_GAME;
+            gameData = lastGames.get(index);
+            ws.connect(authToken, gameID, teamColor);
+            return "";
         } else {
-            teamColor = ChessGame.TeamColor.BLACK;
+            return "You are already connected to a game or you are not logged in yet\n";
         }
-        isWhite = teamColor.equals(ChessGame.TeamColor.WHITE);
-        gameID = lastGames.get(index).gameID();
-        server.join(new JoinGameRequest(color, gameID), authToken);
-        this.currentState = State.IN_GAME;
-        gameData = lastGames.get(index);
-        ws.connect(authToken, gameID, teamColor);
-        return "";
     }
 
     public String leave() throws ResponseException {
@@ -200,22 +210,26 @@ public class Client implements NotificationHandler {
     }
 
     public String observe(String[] params) throws ResponseException {
-        if (params.length < 1) {
-            return "Expected: <GAME NUMBER>\n";
+        if (currentState.equals(State.LOGGED_IN)) {
+            if (params.length < 1) {
+                return "Expected: <GAME NUMBER>\n";
+            }
+            int index;
+            try {
+                index = Integer.parseInt(params[0]) - 1;
+            } catch (NumberFormatException e) {
+                return "Invalid number\n";
+            }
+            if (index < 0 || index >= lastGames.size()) {
+                return "Invalid game number\n";
+            }
+            this.currentState = State.OBSERVING;
+            gameID = lastGames.get(index).gameID();
+            ws.connect(authToken, gameID, null);
+            return "";
+        } else {
+            return "You are already connected to a game or you are not logged in yet\n";
         }
-        int index;
-        try {
-            index = Integer.parseInt(params[0]) - 1;
-        } catch (NumberFormatException e) {
-            return "Invalid number\n";
-        }
-        if (index < 0 || index >= lastGames.size()) {
-            return "Invalid game number\n";
-        }
-        this.currentState = State.OBSERVING;
-        gameID = lastGames.get(index).gameID();
-        ws.connect(authToken, gameID, null);
-        return "";
     }
 
     public String redraw() {
@@ -247,45 +261,53 @@ public class Client implements NotificationHandler {
     }
 
     public String resign() throws ResponseException {
-        System.out.println("Are you sure that you want to resign? Yes or No\n");
-        Scanner scanner = new Scanner(System.in);
-        String line = scanner.nextLine();
-        if (line.equalsIgnoreCase("Yes")) {
-            ws.resign(authToken, gameID);
+        if (currentState.equals(State.IN_GAME)) {
+            System.out.println("Are you sure that you want to resign? Yes or No\n");
+            Scanner scanner = new Scanner(System.in);
+            String line = scanner.nextLine();
+            if (line.equalsIgnoreCase("Yes")) {
+                ws.resign(authToken, gameID);
+            }
+            printPrompt();
+            return "";
+        } else {
+            return "You are not currently a player in a game\n";
         }
-        printPrompt();
-        return "";
     }
 
     public String makemove(String[] params) throws ResponseException {
-        if (params.length < 2 || params.length > 3) {
-            return "Expected: <START_POSITION> <END_POSITION> <PROMOTION_PIECE>";
+        if (currentState.equals(State.IN_GAME)) {
+            if (params.length < 2 || params.length > 3) {
+                return "Expected: <START_POSITION> <END_POSITION> <PROMOTION_PIECE>\n";
+            }
+            if (gameData.game().getFinished()){
+                return "The game is already over";
+            }
+            ChessPosition startPosition, endPosition;
+            ChessPiece.PieceType pieceType = null;
+            try {
+                startPosition = parsePosition(params[0]);
+                endPosition = parsePosition(params[1]);
+            } catch (IllegalArgumentException e) {
+                return "Invalid position.\n";
+            }
+            if (params.length == 3) {
+                pieceType = convertToPieceType(params[2]);
+            }
+            ChessMove move = new ChessMove(startPosition, endPosition, pieceType);
+            if (gameData.game().getTeamTurn() != teamColor) {
+                return "It is not your turn\n";
+            }
+            try {
+                gameData.game().makeMove(move);
+                ws.makemove(authToken, gameID, move);
+            } catch (InvalidMoveException e) {
+                throw new ResponseException(e.getMessage());
+            }
+            return "";
+        } else {
+            return "You are not currently a player in a game\n";
         }
-        if (gameData.game().getFinished()){
-            return "The game is already over";
-        }
-        ChessPosition startPosition, endPosition;
-        ChessPiece.PieceType pieceType = null;
-        try {
-            startPosition = parsePosition(params[0]);
-            endPosition = parsePosition(params[1]);
-        } catch (IllegalArgumentException e) {
-            return "Invalid position.\n";
-        }
-        if (params.length == 3) {
-            pieceType = convertToPieceType(params[2]);
-        }
-        ChessMove move = new ChessMove(startPosition, endPosition, pieceType);
-        if (gameData.game().getTeamTurn() != teamColor) {
-            return "It is not your turn";
-        }
-        try {
-            gameData.game().makeMove(move);
-            ws.makemove(authToken, gameID, move);
-        } catch (InvalidMoveException e) {
-            throw new ResponseException(e.getMessage());
-        }
-        return "";
     }
 
     public ChessPiece.PieceType convertToPieceType(String pieceType){
