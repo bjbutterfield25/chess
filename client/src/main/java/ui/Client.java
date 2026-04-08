@@ -37,7 +37,8 @@ public class Client implements NotificationHandler {
             case LOAD_GAME:
                 LoadGameMessage loadGameNotification = (LoadGameMessage) notification;
                 System.out.println();
-                drawGame(loadGameNotification.getGame());
+                this.gameData = loadGameNotification.getGame();
+                drawGame(gameData);
                 break;
             case ERROR:
                 ErrorMessage errorMessage = (ErrorMessage) notification;
@@ -180,9 +181,18 @@ public class Client implements NotificationHandler {
     }
 
     public String leave() throws ResponseException {
-        ws.leave(authToken, gameID);
-        currentState = State.LOGGED_IN;
-        return "Successfully left the game\n";
+        if (currentState == State.IN_GAME || currentState == State.OBSERVING){
+            try {
+                ws.leave(authToken, gameID);
+            } catch (Exception e) {
+                System.out.println("Note: Server connection was already closed.\n");
+            }
+            currentState = State.LOGGED_IN;
+            return "Successfully left the game\n";
+        }
+        else {
+            return "Not currently in a game";
+        }
     }
 
     public void drawGame(GameData game){
@@ -243,6 +253,7 @@ public class Client implements NotificationHandler {
         if (line.equalsIgnoreCase("Yes")) {
             ws.resign(authToken, gameID);
         }
+        printPrompt();
         return "";
     }
 

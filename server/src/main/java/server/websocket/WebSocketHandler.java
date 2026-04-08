@@ -158,7 +158,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: cannot resign")));
             return;
         }
-        if (gameData.blackUsername().equals(username) || gameData.whiteUsername().equals(username)){
+        if (Objects.equals(username, gameData.whiteUsername()) || Objects.equals(username, gameData.blackUsername())){
             var resignMessage = String.format("%s resigned", username);
             game.setFinished();
             updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());

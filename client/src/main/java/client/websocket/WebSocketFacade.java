@@ -19,13 +19,17 @@ public class WebSocketFacade extends Endpoint {
 
     Session session;
     NotificationHandler notificationHandler;
+    private final String url;
 
     public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
-        try {
-            url = url.replace("http", "ws");
-            URI socketURI = new URI(url + "/ws");
-            this.notificationHandler = notificationHandler;
+        this.url = url.replace("http", "ws");
+        this.notificationHandler = notificationHandler;
+        connectSession();
+    }
 
+    public void connectSession() throws ResponseException {
+        try {
+            URI socketURI = new URI(url + "/ws");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
@@ -59,6 +63,9 @@ public class WebSocketFacade extends Endpoint {
 
     public void connect(String authToken, int gameID, ChessGame.TeamColor teamColor) throws ResponseException {
         try {
+            if (this.session == null || !this.session.isOpen()) {
+                connectSession();
+            }
             var command = new ConnectCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, teamColor);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
@@ -68,6 +75,9 @@ public class WebSocketFacade extends Endpoint {
 
     public void leave(String authToken, int gameID) throws ResponseException{
         try {
+            if (this.session == null || !this.session.isOpen()) {
+                connectSession();
+            }
             var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
@@ -77,6 +87,9 @@ public class WebSocketFacade extends Endpoint {
 
     public void makemove(String authToken, int gameID, ChessMove move) throws ResponseException {
         try {
+            if (this.session == null || !this.session.isOpen()) {
+                connectSession();
+            }
             var command = new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
@@ -86,6 +99,9 @@ public class WebSocketFacade extends Endpoint {
 
     public void resign(String authToken, int gameID) throws ResponseException{
         try {
+            if (this.session == null || !this.session.isOpen()) {
+                connectSession();
+            }
             var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException ex) {
