@@ -33,9 +33,7 @@ public class Server {
         joinGameEndpoint(javalin);
         listGamesEndpoint(javalin);
         javalin.ws("/ws", ws -> {
-            ws.onConnect(webSocketHandler);
             ws.onMessage(webSocketHandler);
-            ws.onClose(webSocketHandler);
         });
     }
 
