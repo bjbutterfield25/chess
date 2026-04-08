@@ -118,7 +118,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             try {
                 game.makeMove(command.getMove());
                 updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());
-                connections.broadcast(null, new LoadGameMessage(gameData), command.getGameID());
+                GameData updatedGame = getGame(command.getGameID());
+                connections.broadcast(null, new LoadGameMessage(updatedGame), command.getGameID());
                 var message = String.format("%s made the following move:\n" + command.getMove().toString(), username);
                 var notification = new NotificationMessage(message);
                 connections.broadcast(session, notification, command.getGameID());

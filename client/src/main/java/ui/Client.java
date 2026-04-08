@@ -56,7 +56,7 @@ public class Client implements NotificationHandler {
         while (!result.equals("quit")) {
             String line = scanner.nextLine();
             try {
-                result = eval(line);
+                result = eval(line, scanner);
                 if (result.equalsIgnoreCase("quit")){
                     System.out.print(result);
                     break;
@@ -76,7 +76,7 @@ public class Client implements NotificationHandler {
         System.out.print("\n" + ">>> ");
     }
 
-    public String eval(String input) {
+    public String eval(String input, Scanner scanner) {
         try {
             String[] tokens = input.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -94,7 +94,7 @@ public class Client implements NotificationHandler {
                 case "highlight" -> highlight(params);
                 case "leave" -> leave();
                 case "move" -> makemove(params);
-                case "resign" -> resign();
+                case "resign" -> resign(scanner);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -257,13 +257,13 @@ public class Client implements NotificationHandler {
         }
         ChessBoard.draw(isWhite, gameData.game(), highlightPositions, selectedPosition);
         highlightPositions = new ArrayList<>();
+        printPrompt();
         return "";
     }
 
-    public String resign() throws ResponseException {
+    public String resign(Scanner scanner) throws ResponseException {
         if (currentState.equals(State.IN_GAME)) {
             System.out.println("Are you sure that you want to resign? Yes or No\n");
-            Scanner scanner = new Scanner(System.in);
             String line = scanner.nextLine();
             if (line.equalsIgnoreCase("Yes")) {
                 ws.resign(authToken, gameID);
@@ -298,12 +298,7 @@ public class Client implements NotificationHandler {
             if (gameData.game().getTeamTurn() != teamColor) {
                 return "It is not your turn\n";
             }
-            try {
-                gameData.game().makeMove(move);
-                ws.makemove(authToken, gameID, move);
-            } catch (InvalidMoveException e) {
-                throw new ResponseException(e.getMessage());
-            }
+            ws.makemove(authToken, gameID, move);
             return "";
         } else {
             return "You are not currently a player in a game\n";
