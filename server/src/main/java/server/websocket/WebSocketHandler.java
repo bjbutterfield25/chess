@@ -46,6 +46,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     return;
                 }
                 username = authData.username();
+                connections.add(username, ctx.session, command.getGameID(), null);
             } catch (DataAccessException e) {
                 throw new RuntimeException("Unauthorized");
             }

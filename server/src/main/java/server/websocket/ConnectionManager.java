@@ -12,7 +12,8 @@ public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
     public void add(String username, Session session, int gameID, ChessGame.TeamColor teamColor) {
-        Connection connection = new Connection(session, gameID, teamColor);
+        ChessGame.TeamColor color = connections.containsKey(username) ? connections.get(username).teamColor() : teamColor;
+        Connection connection = new Connection(session, gameID, color);
         connections.put(username, connection);
     }
 

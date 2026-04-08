@@ -298,6 +298,11 @@ public class Client implements NotificationHandler {
             if (gameData.game().getTeamTurn() != teamColor) {
                 return "It is not your turn\n";
             }
+            try {
+                gameData.game().makeMove(move);
+            } catch (InvalidMoveException e) {
+                return "Error: invalid move\n";
+            }
             ws.makemove(authToken, gameID, move);
             return "";
         } else {
