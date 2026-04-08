@@ -89,22 +89,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(new ErrorMessage("Error: invalid game")));
             return;
         }
-        var connection = connections.getConnection(username);
-        ChessGame.TeamColor color = connection.teamColor();
-        String whiteUsername, blackUsername;
-        if (color != null) {
-            if (color.equals(ChessGame.TeamColor.WHITE)) {
-                whiteUsername = null;
-                blackUsername = game.blackUsername();
-            } else if (color.equals(ChessGame.TeamColor.BLACK)) {
-                blackUsername = null;
-                whiteUsername = game.whiteUsername();
-            } else {
-                blackUsername = game.blackUsername();
-                whiteUsername = game.whiteUsername();
-            }
-            updateGameUsers(command.getGameID(), whiteUsername, blackUsername);
+        String whiteUsername = game.whiteUsername();
+        String blackUsername = game.blackUsername();
+        if (username.equals(whiteUsername)) {
+            whiteUsername = null;
+        } else if (username.equals(blackUsername)) {
+            blackUsername = null;
         }
+        updateGameUsers(command.getGameID(), whiteUsername, blackUsername);
         var message = String.format("%s left the game", username);
         var notification = new NotificationMessage(message);
         connections.broadcast(session, notification, command.getGameID());
