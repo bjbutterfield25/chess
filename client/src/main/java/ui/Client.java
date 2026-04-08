@@ -93,6 +93,7 @@ public class Client implements NotificationHandler {
                 case "highlight" -> highlight(params);
                 case "leave" -> leave();
                 case "move" -> makemove(params);
+                case "resign" -> resign();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -232,6 +233,16 @@ public class Client implements NotificationHandler {
         }
         ChessBoard.draw(isWhite, gameData.game(), highlightPositions, selectedPosition);
         highlightPositions = new ArrayList<>();
+        return "";
+    }
+
+    public String resign() throws ResponseException {
+        System.out.println("Are you sure that you want to resign? Yes or No\n");
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+        if (line.equalsIgnoreCase("Yes")) {
+            ws.resign(authToken, gameID);
+        }
         return "";
     }
 
