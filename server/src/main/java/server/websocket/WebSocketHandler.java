@@ -124,16 +124,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 var message = String.format("%s made the following move:\n" + command.getMove().toString(), username);
                 var notification = new NotificationMessage(message);
                 connections.broadcast(session, notification, command.getGameID());
-                if (game.isInCheck(game.getTeamTurn())){
-                    var checkMessage = String.format("%s is in check",
-                            game.getTeamTurn().equals(ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername());
-                    connections.broadcast(null, new NotificationMessage(checkMessage), command.getGameID());
-                } else if (game.isInCheckmate(game.getTeamTurn())){
+                if (game.isInCheckmate(game.getTeamTurn())){
                     var checkmateMessage = String.format("%s is in checkmate",
                             game.getTeamTurn().equals(ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername());
                     game.setFinished();
                     updateGame(command.getGameID(), game, gameData.whiteUsername(), gameData.blackUsername());
                     connections.broadcast(null, new NotificationMessage(checkmateMessage), command.getGameID());
+                } else if (game.isInCheck(game.getTeamTurn())){
+                    var checkMessage = String.format("%s is in check",
+                            game.getTeamTurn().equals(ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername());
+                    connections.broadcast(null, new NotificationMessage(checkMessage), command.getGameID());
                 } else if (game.isInStalemate(game.getTeamTurn())){
                     var stalemateMessage = String.format("%s and %s are in stalemate",
                             gameData.whiteUsername(), gameData.blackUsername());
